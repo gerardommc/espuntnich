@@ -100,7 +100,7 @@ ppmve <- function(points = NULL,
 
         samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
 
-        wei <- terra::extract(weights.r, cov.df[s, c("x", "y")])[,2]
+        wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])[,2]
 
         nas <- wei |> is.na()
 
@@ -131,7 +131,7 @@ ppmve <- function(points = NULL,
     area.weights[] <- Qa$w[beg:en]
     weights.r <- area.weights |> rast()
     samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
-    wei <- terra::extract(weights.r, cov.df[s, c("x", "y")])
+    wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])
     nas <- wei |> is.na()
     samp <- samp[!nas]
     wei <- wei[!nas]
@@ -246,16 +246,16 @@ ppmve <- function(points = NULL,
   #Loading the specified Nimble model
   if(Distance == "mahalanobis"){
     if(CovMat == "global"){
-      source("NimbleModels/ppmveGlobalMahalPois.R")
+      modelCode <- GlobalMahal
     }
 
     if(CovMat == "local"){
-      source("NimbleModels/ppmveLocalMahalPois.R")
+      modelCode <- LocalMahal
     }
   }
 
   if(Distance == "euclidean"){
-    source("NimbleModels/ppmveEuclidPois.R")
+    modelCode <- Euclid
   }
 
   model <- nimble::nimbleModel(code = modelCode, 
