@@ -1,4 +1,4 @@
-modelCode <- nimbleCode({
+LocalMahal <- nimble::nimbleCode({
   for(i in 1:n.clim){
     centroid.pres[i] ~ dnorm(0, 0.1)
     mu.back[i]  ~ dnorm(0, 1.0E-4)

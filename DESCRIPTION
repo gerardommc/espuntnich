@@ -14,3 +14,11 @@ Description: Fit an ellipsoid within a point process model for ecological niche 
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Imports:
+      terra,
+      spatstat,
+      nimble,
+      coda,
+      espatsmo,
+      foreach,
+      doParallel

@@ -1,6 +1,6 @@
 #' @title Fit an inhomogeneous Poisson Point Process Model as a function of distance to an ellipsoid's centroid
-#' @description 
-#' @param points = A two-column data.frame with names x and y for the presence localities. 
+#' @description
+#' @param points = A two-column data.frame with names x and y for the presence localities.
 #' @param covariates = A SpatRaster or imList object, containing the covariates.
 #' @param covariate.names = A character vector with the names of the covariaes to be used in the model.
 #' @param no.bkgd = The number of background points to be drawn from the covariates.
@@ -11,7 +11,7 @@
 #' @param niter = A numeric value indicating the number of MCMC iterations.
 #' @param nburnin = A numeric value indicating the number of MCMC iterations to be discarded at the beginning of each chain.
 #' @param thin = A numeric value indicating the interval of MCMC iterations from which posterior values will be sampled
-#' @param asCoda = Logical, indicating whether the objecct returned by nimble rum is of class coda. This shoule be set to T to use predict methods. 
+#' @param asCoda = Logical, indicating whether the objecct returned by nimble rum is of class coda. This shoule be set to T to use predict methods.
 #' @param chains = A numeric value indicating the number of chains to be run. If convergence diagnostics are to be run, the number should be at least 2.
 #' @param WAIC = Logical, whether to compute the Watanabe--Akaike information criterion, T.
 #' @param parallel = Logical, whether to run chains in parallel, F.
@@ -20,8 +20,8 @@
 #' @param weight.bias.conf = A list with default entries, nsim =  39, positive = TRUE, kernel = "gaussian", sigma = NULL, varcov = NULL, weights = NULL, edge = TRUE, which are used to configure the replaceQAreas function and density.ppm, only relevant if bias.correction = "weights" and the class of bias.data is data.frame
 #' @return An object of class ppmve and the type of distance and covariance matrix used.
 
-ppmve <- function(points = NULL, 
-                  covariates = NULL, 
+ppmve <- function(points = NULL,
+                  covariates = NULL,
                   covariate.names = NULL,
                   no.bkgd = 5000,
                   bias.data = NULL,
@@ -31,7 +31,7 @@ ppmve <- function(points = NULL,
                   niter = NULL,
                   nburnin = NULL,
                   thin = NULL,
-                  asCoda = T, 
+                  asCoda = T,
                   chains = 2,
                   WAIC = T,
                   parallel = F,
@@ -42,15 +42,11 @@ ppmve <- function(points = NULL,
                     positive = TRUE,
                     kernel = "gaussian",
                     sigma = NULL,
-                    varcov = NULL, 
-                    weights = NULL, 
+                    varcov = NULL,
+                    weights = NULL,
                     edge = TRUE)){
 
-  require(nimble)
-  require(spatstat)
-  require(terra)
-  require(foreach)
-  
+
   if(is.null(points) | is.null(covariates) | is.null(covariate.names)){
     stop("Please specify valid inputs for points, covariates and covariate.names")
   }
@@ -62,7 +58,7 @@ ppmve <- function(points = NULL,
   cov.df <- as.data.frame(covariates, xy = T)
   p.ext <- terra::extract(covariates, points, ID = F, na.rm = T) |> na.omit() |> as.data.frame()
 
-  iml <- imFromStack(covariates)
+  iml <- espatsmo::imFromStack(covariates)
   win <- spatstat.geom::as.owin(iml[[1]])
   p.pp <- spatstat.geom::ppp(x = points$x, y = points$y, window = win)
 
@@ -76,22 +72,22 @@ ppmve <- function(points = NULL,
     samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
     wei <- max(Q$w)
   }
-  
+
   if(!is.null(bias.correction)){
 
     #Background data with bias correction
     #Bias correction based on are weights
     if(bias.correction == "weights"){
       if(class(bias.data) == "data.frame"){
-        Qa <- replaceQAreas(Q = Q,
-                            bias.data = bias.data, 
-                            im = iml[[1]], 
+        Qa <- espatsmo::replaceQAreas(Q = Q,
+                            bias.data = bias.data,
+                            im = iml[[1]],
                             nsim =  weight.bias.conf$nsim,
                             positive = weight.bias.conf$positive,
                             kernel = weight.bias.conf$kernel,
                             sigma = weight.bias.conf$sigma,
-                            varcov = weight.bias.conf$sigma, 
-                            weights = weight.bias.conf$weights, 
+                            varcov = weight.bias.conf$sigma,
+                            weights = weight.bias.conf$weights,
                             edge = weight.bias.conf$edge)
 
         area.weights <- iml[[1]]
@@ -111,25 +107,25 @@ ppmve <- function(points = NULL,
 
   if(class(bias.data) == "SpatRaster"){
 
-    bias.data <- terra::resample(bias.data, covariates[[1]]) |> ZeroOneNorm()
+    bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
     bias.df <- as.data.frame(bias.data, xy = TRUE)
     ids.bias <- sample(1:nrow(bias.df), no.bkgd, prob = bias.df[, 3]) |> sort()
     locs.bias <- bias.df[ids.bias, ]
 
-    Qa <- replaceQAreas(Q = Q,
-                        bias.data = locs.bias, 
-                        im = iml[[1]], 
+    Qa <- espatsmo::replaceQAreas(Q = Q,
+                        bias.data = locs.bias,
+                        im = iml[[1]],
                         nsim =  weight.bias.conf$nsim,
                         positive = weight.bias.conf$positive,
                         kernel = weight.bias.conf$kernel,
                         sigma = weight.bias.conf$sigma,
-                        varcov = weight.bias.conf$sigma, 
-                        weights = weight.bias.conf$weights, 
+                        varcov = weight.bias.conf$sigma,
+                        weights = weight.bias.conf$weights,
                         edge = weight.bias.conf$edge)
 
     area.weights <- iml[[1]]
     area.weights[] <- Qa$w[beg:en]
-    weights.r <- area.weights |> rast()
+    weights.r <- area.weights |> terra::rast()
     samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
     wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])
     nas <- wei |> is.na()
@@ -141,13 +137,13 @@ ppmve <- function(points = NULL,
 #Bias correction based on location of  background data
   if(bias.correction == "background"){
     if(class(bias.data) == "data.frame"){
-      bias.ppp <- ppp(x = bias.data$x, y = bias.data$y, window = win)
-      dens.r <- spatstat.geom::density.ppp(bias.ppp, 
+      bias.ppp <- spatstat.geom::ppp(x = bias.data$x, y = bias.data$y, window = win)
+      dens.r <- spatstat.geom::density.ppp(bias.ppp,
                                            positive = weight.bias.conf$positive,
                                            kernel = weight.bias.conf$kernel,
                                            sigma = weight.bias.conf$sigma,
-                                           varcov = weight.bias.conf$varcov, 
-                                           weights = weight.bias.conf$weights, 
+                                           varcov = weight.bias.conf$varcov,
+                                           weights = weight.bias.conf$weights,
                                            edge = weight.bias.conf$edge) |> terra::rast()
 
       dens.df <- as.data.frame(dens.r, xy = TRUE)
@@ -162,7 +158,7 @@ ppmve <- function(points = NULL,
     }
 
     if(class(bias.data) == "SpatRaster"){
-      bias.data <- terra::resample(bias.data, covariates[[1]]) |> ZeroOneNorm()
+      bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
 
       bias.df <- as.data.frame(bias.data, xy = TRUE)
 
@@ -183,7 +179,7 @@ ppmve <- function(points = NULL,
   if(Distance == "mahalanobis"){
     if(length(wei) == 1){
       constants <- list(n.clim = ncol(clim.back),
-                        w = c(rep(1/wei, nrow(points)), 
+                        w = c(rep(1/wei, nrow(points)),
                               rep(wei, nrow(clim.back))),
                         R = diag(ncol(clim.back)),
                         n.data = nrow(points) + nrow(clim.back),
@@ -198,11 +194,11 @@ ppmve <- function(points = NULL,
                         n.back = nrow(clim.back))
     }
   }
-  
+
   if(Distance == "euclidean"){
     if(length(wei) == 1){
       constants <- list(n.clim = ncol(clim.back),
-                        w = c(rep(1/wei, nrow(points)), 
+                        w = c(rep(1/wei, nrow(points)),
                               rep(wei, nrow(clim.back))),
                         n.data = nrow(points) + nrow(clim.back),
                         n.back = nrow(clim.back))
@@ -213,9 +209,9 @@ ppmve <- function(points = NULL,
                         n.back = nrow(clim.back))
     }
   }
-  
+
   # Configure parms, data and inits for model types
-  
+
   if(Distance == "mahalanobis"){
       parms <- c("centroid.pres",
                   "mu.back",
@@ -227,7 +223,7 @@ ppmve <- function(points = NULL,
               tau.pres = diag(1, nrow = constants$n.clim),
               beta = 0)
     }
-  
+
   if(Distance == "euclidean"){
     inits <- list(centroid.pres = rep(0, constants$n.clim),
               tau.pres = rep(1, constants$n.clim),
@@ -237,7 +233,7 @@ ppmve <- function(points = NULL,
            "tau.pres",
            "beta")
   }
-  
+
 
   data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                clim = rbind(p.ext, clim.back),
@@ -250,7 +246,7 @@ ppmve <- function(points = NULL,
     }
 
     if(CovMat == "local"){
-      modelCode <- LocalMahal
+      modelCode <- GlobalMahal
     }
   }
 
@@ -258,8 +254,8 @@ ppmve <- function(points = NULL,
     modelCode <- Euclid
   }
 
-  model <- nimble::nimbleModel(code = modelCode, 
-                               constants = constants, 
+  model <- nimble::nimbleModel(code = modelCode,
+                               constants = constants,
                                data = data,
                                inits = inits,
                                dimensions = list(covMat.pres = c(constants$n.clim, constants$n.clim)))
@@ -275,7 +271,7 @@ ppmve <- function(points = NULL,
   set.seed(seed)
 
   if(parallel){
-  require(doParallel); doParallel::registerDoParallel(cores = cores)
+  doParallel::registerDoParallel(cores = cores)
     run <- doParallel::foreach(i = 1:chains) %dopar% {
       nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = thin, samplesAsCodaMCMC = asCoda, nchains = 1, WAIC = F)
     }
@@ -288,14 +284,14 @@ ppmve <- function(points = NULL,
                                 niter = niter,
                                 nburnin = nburnin,
                                 thin = thin,
-                                asCoda = asCoda, 
+                                asCoda = asCoda,
                                 chains = chains,
                                 WAIC = WAIC,
                                 parallel = parallel,
                                 cores = cores,
                                 seed = seed),
                                 bkgd.points = cov.df[samp, c(1:2)])
-    
+
     class(ret.list) <- c("ppmve", Distance, CovMat)
 
     return(ret.list)
@@ -309,7 +305,7 @@ ppmve <- function(points = NULL,
                                 niter = niter,
                                 nburnin = nburnin,
                                 thin = thin,
-                                asCoda = asCoda, 
+                                asCoda = asCoda,
                                 chains = chains,
                                 WAIC = WAIC,
                                 parallel = parallel,
@@ -317,15 +313,15 @@ ppmve <- function(points = NULL,
                                 seed = seed),
                                 bkgd.points = cov.df[samp, c(1:2)])
 
-  
+
     if(Distance == "mahalanobis"){
       class(ret.list) <- c("ppmve", Distance, CovMat)
     }
-      
+
     if(Distance == "euclidean"){
       class(ret.list) <- c("ppmve", Distance)
     }
 
-    return(ret.list)  
+    return(ret.list)
   }
 }

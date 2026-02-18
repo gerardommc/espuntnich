@@ -1,4 +1,4 @@
-modelCode <- nimbleCode({
+Euclid <- nimble::nimbleCode({
   for(i in 1:n.clim){
     centroid.pres[i] ~ dnorm(0, 0.1)
     tau.pres[i]  ~ dunif(0, 100)
