@@ -7,11 +7,17 @@ Authors@R: c(
       "Gerardo", "Martín",
       email = "gerardo.mmc@enesmerida.unam.mx",
       role = c("aut", "cre")
+    ),
+    person(
+      "Eduardo", "Pacheco",
+      email = "epacheco@ciencias.unam.mx",
+      role = c("ctb")
     )
   )
 Description: Fit an ellipsoid within a point process model for ecological niche modelling
-	using Nimble as the MonteCarlo simulation platform, while also accounting for observation bias.
-License: What license is it under?
+    	using Nimble as the MonteCarlo simulation platform, while also accounting for observation bias.
+Maintainer: Gerardo Martín <gerardo.mmc@enesmerida.unam.mx>
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
