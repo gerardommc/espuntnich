@@ -1,16 +1,16 @@
 Package: espuntnich
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Fit Point Process Models for Ecological Niche Modelling
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Gerardo", "Martín",
+      email = "gerardo.mmc@enesmerida.unam.mx",
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: Fit an ellipsoid within a point process model for ecological niche modelling
+	using Nimble as the MonteCarlo simulation platform, while also accounting for observation bias.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
