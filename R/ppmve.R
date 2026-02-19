@@ -26,7 +26,7 @@ ppmve <- function(points = NULL,
                   no.bkgd = 5000,
                   bias.data = NULL,
                   bias.correction = NULL, #options = "background", "weights"
-                  CovMat = "global",
+                  CovMat = "local",
                   Distance = "mahalanobis", #options = "euclidean"
                   niter = NULL,
                   nburnin = NULL,
@@ -247,6 +247,10 @@ ppmve <- function(points = NULL,
 
     if(CovMat == "local"){
       modelCode <- GlobalMahal
+    }
+
+    if(CovMat == "locallocal"){
+      modelCode <- LocalLocalMahal
     }
   }
 
