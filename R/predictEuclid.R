@@ -7,8 +7,29 @@
 #' @param newdata = A SpatRaster object with covariate names contained in the covariate.names argument of ppmve function
 #' @param probs = The posterior probability quantiles to be returned by predict.ppmve
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of distance to the estimated centroids
+#' @examples
+#' \dontrun{
+#' r <- terra::rast(paste0("bio",c(1, 2, 12, 17), ".tif")) |> scale()
+#' 
+#' p <- read.csv("points.csv")
+#' 
+#' m <- ppmve(points = p,
+#'            covariates = r,
+#'            covariate.names = names(r),
+#'            Distance = "euclidean",
+#'            no.bkgd = 5000,
+#'            niter = 10000,
+#'            thin = 9,
+#'            nburnin = 1000,
+#'            chains = 1) 
+#' 
+#' predictions <- predict(object = m, nedata = r, probs = c(0.0275, 0.5, 0.975))
+#' 
+#' plot(predictions)
+#' }
+#' @export
 
-predict.ppmve.euclidean <- function(model = NULL, newdata = NULL, probs = 0.5){
+predict.ppmve.euclidean <- function(object = NULL, newdata = NULL, probs = 0.5){
 
   if(class(newdata) != "SpatRaster"){
     stop("Please provide a SpatRaster object")
@@ -16,17 +37,17 @@ predict.ppmve.euclidean <- function(model = NULL, newdata = NULL, probs = 0.5){
 
   if(class(newdata) == "SpatRaster"){
     cov.df <- newdata |> as.data.frame(xy = T)
-    cov.df1 <- cov.df |> subset(select = c(model$call$covariates)) |> as.matrix()
+    cov.df1 <- cov.df |> subset(select = c(object$call$covariates)) |> as.matrix()
   }
 
-  if(model$call$chains == 1){
-    mcl <- model$model$samples |> coda::as.mcmc()
+  if(object$call$chains == 1){
+    mcl <- object$model$samples |> coda::as.mcmc()
   }
 
-  if(model$call$chains > 1){
-    mcl <- model$model$samples |> coda::as.mcmc.list()
+  if(object$call$chains > 1){
+    mcl <- object$model$samples |> coda::as.mcmc.list()
     mc <- mcl[[1]]
-    for(i in 2:model$call$chains){
+    for(i in 2:object$call$chains){
       mc <- rbind(mc, mcl[[i]])
     }
 

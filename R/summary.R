@@ -21,21 +21,14 @@
 #'            thin = 9,
 #'            nburnin = 1000,
 #'            chains = 1)
-#' }
 #' 
-#' summary(model = m)
+#' summary(model$model$samples)
+#' }
 #' @export
 
 
-summary.ppmve <- function(model = NULL){
-  UseMethod("summary.ppmve", model)
+summary.ppmve <- function(object = NULL){
+  summary(object =object$model$samples)
 }
 
-summary.ppmve.mahalanobis <- function(model = NULL){
-  summary(model$model$samples)
-}
-
-summary.ppmve.euclidean <- function(model = NULL){
-  summary(model$model$samples)
-}
 
