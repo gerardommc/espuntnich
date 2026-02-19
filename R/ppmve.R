@@ -19,6 +19,24 @@
 #' @param seed = Numeric, idincating the random seed generator number, 123.
 #' @param weight.bias.conf = A list with default entries, nsim =  39, positive = TRUE, kernel = "gaussian", sigma = NULL, varcov = NULL, weights = NULL, edge = TRUE, which are used to configure the replaceQAreas function and density.ppm, only relevant if bias.correction = "weights" and the class of bias.data is data.frame
 #' @return An object of class ppmve and the type of distance and covariance matrix used.
+#' @examples
+#' \dontrun{
+#' r <- terra::rast(paste0("bio",c(1, 2, 12, 17), ".tif")) |> scale()
+#' 
+#' p <- read.csv("points.csv")
+#' 
+#' m <- ppmve(points = p,
+#'            covariates = r,
+#'            covariate.names = names(r),
+#'            CovMat = "local",
+#'            Distance = "mahalanobis",
+#'            no.bkgd = 5000,
+#'            niter = 10000,
+#'            thin = 9,
+#'            nburnin = 1000,
+#'            chains = 1)
+#' }
+#' @export
 
 ppmve <- function(points = NULL,
                   covariates = NULL,
