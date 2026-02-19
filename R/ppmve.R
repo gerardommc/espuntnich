@@ -319,7 +319,7 @@ ppmve <- function(points = NULL,
 
 
     if(Distance == "mahalanobis"){
-      class(ret.list) <- c("ppmve", Distance, CovMat)
+      class(ret.list) <- c("ppmve", Distance)
     }
 
     if(Distance == "euclidean"){
