@@ -9,6 +9,6 @@
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of distance to the estimated centroids
 #' @export
 
-predict.ppmve <- function(object = NULL, newdata = NULL, probs = 0.5){
-  UseMethod("predict.ppmve", object)
+predict.ppmve <- function(object = NULL){
+  NextMethod("predict.ppmve", object)
 }

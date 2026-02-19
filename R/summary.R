@@ -26,9 +26,8 @@
 #' }
 #' @export
 
-
-summary.ppmve <- function(object = NULL){
-  summary(object =object$model$samples)
+summary.ppmve <- function(model = NULL){
+  summary(model = model$model$samples)
 }
 
 

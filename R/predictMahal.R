@@ -3,7 +3,7 @@
 #' Project a ppmve model onto geographic space. To do this, the user should profide
 #' a fitted model, and the covariates in SpatRaster format with the same name as
 #' used to fit the model.
-#' @param model = A model object of class ppmve
+#' @param object = A model object of class ppmve
 #' @param newdata = A SpatRaster object with covariate names contained in the covariate.names argument of ppmve function
 #' @param probs = The posterior probability quantiles to be returned by predict.ppmve
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of distance to the estimated centroids
@@ -24,7 +24,7 @@
 #'            nburnin = 1000,
 #'            chains = 1) 
 #' 
-#' predictions <- predict(object = m, nedata = r, probs = c(0.0275, 0.5, 0.975))
+#' predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
 #' 
 #' plot(predictions)
 #' }
