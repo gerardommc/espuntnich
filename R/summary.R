@@ -22,11 +22,15 @@
 #'            nburnin = 1000,
 #'            chains = 1)
 #' 
-#' summary(model$model$samples)
+#' summary(m)
 #' }
 #' @export
 
 summary.ppmve <- function(model = NULL){
+  if(is.null(model)){
+    stop("Please provide a valid ppmve object")
+  }
+
   summary(model = model$model$samples)
 }
 
