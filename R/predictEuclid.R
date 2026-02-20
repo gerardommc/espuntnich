@@ -31,6 +31,14 @@
 
 predict.ppmve.euclidean <- function(object = NULL, newdata = NULL, probs = 0.5){
 
+  if(is.null(object)){
+    stop("Please provide a valid ppmve model")
+  }
+
+  if(is.null(newdata)){
+    stop("Please provide a valid data.frame or SpatRaster object")
+  }
+
   if(class(newdata) != "SpatRaster"){
     stop("Please provide a SpatRaster object")
   }

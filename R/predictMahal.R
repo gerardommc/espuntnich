@@ -35,6 +35,18 @@ predict.ppmve.mahalanobis <- function(object = NULL,
                                       newdata = NULL,
                                       probs = 0.5){
 
+  if(is.null(object)){
+    stop("Please provide a valid ppmve model")
+  }
+
+  if(is.null(newdata)){
+    stop("Please provide a valid data.frame or SpatRaster object")
+  }
+
+  if(class(newdata) != "SpatRaster"){
+    stop("Please provide a SpatRaster object")
+  }
+  
   if(class(newdata) == "SpatRaster"){
     cov.df <- newdata |> as.data.frame(xy = T)
     cov.df1 <- cov.df |> subset(select = c(model$call$covariates)) |> as.matrix()
@@ -45,31 +57,31 @@ predict.ppmve.mahalanobis <- function(object = NULL,
   }
 
 
-if(object$call$chains == 1){
-  mcl <- object$model$samples |> coda::as.mcmc()
-}
-
-if(object$call$chains > 1){
-  mcl <- object$model$samples |> coda::as.mcmc.list()
-  mc <- mcl[[1]]
-  for(i in 2:object$call$chains){
-    mc <- rbind(mc, mcl[[i]])
+  if(object$call$chains == 1){
+    mcl <- object$model$samples |> coda::as.mcmc()
   }
 
-  mcl <- mc |> coda::as.mcmc()
-}
+  if(object$call$chains > 1){
+    mcl <- object$model$samples |> coda::as.mcmc.list()
+    mc <- mcl[[1]]
+    for(i in 2:object$call$chains){
+      mc <- rbind(mc, mcl[[i]])
+  }
 
-if(length(probs) > 1){
-  coefs <- lapply(probs, function(x){coda::HPDinterval(mcl, prob = x)})
-}
+    mcl <- mc |> coda::as.mcmc()
+  }
 
-if(length(probs) == 1){
-  coefs <- coda::HPDinterval(mcl, prob = probs)
-}
+  if(length(probs) > 1){
+    coefs <- lapply(probs, function(x){coda::HPDinterval(mcl, prob = x)})
+  }
 
-tau.names <- expand.grid(i = 1:ncol(cov.df1), j = 1:ncol(cov.df1))
+  if(length(probs) == 1){
+    coefs <- coda::HPDinterval(mcl, prob = probs)
+  }
 
-if(length(probs) > 1){
+  tau.names <- expand.grid(i = 1:ncol(cov.df1), j = 1:ncol(cov.df1))
+
+  if(length(probs) > 1){
 
     p <- foreach::foreach(i = seq_along(probs), .combine = cbind) %do% {
 
