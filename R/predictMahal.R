@@ -49,7 +49,7 @@ predict.ppmve.mahalanobis <- function(object = NULL,
   
   if(class(newdata) == "SpatRaster"){
     cov.df <- newdata |> as.data.frame(xy = T)
-    cov.df1 <- cov.df |> subset(select = c(model$call$covariates)) |> as.matrix()
+    cov.df1 <- cov.df |> subset(select = c(object$call$covariates)) |> as.matrix()
   }
 
   if(class(newdata) != "SpatRaster"){
@@ -117,6 +117,6 @@ predict.ppmve.mahalanobis <- function(object = NULL,
     names(preds) <- paste0("Prob.", probs)
     terra::crs(preds) <- terra::crs(newdata)
   }
-
+  
   return(preds)
 }
