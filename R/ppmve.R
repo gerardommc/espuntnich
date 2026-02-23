@@ -193,48 +193,7 @@ ppmve <- function(points = NULL,
 
   clim.back <- cov.df[samp, -c(1:2)]
 
-  # Loading contstants for each model type
-  if(Distance == "mahalanobis"){
-
-    if(length(wei) > 1){
-      constants <- list(n.clim = ncol(clim.back),
-                        w = c(rep(1/wei, nrow(points)),
-                              rep(wei, nrow(clim.back))),
-                        R = diag(ncol(clim.back)),
-                        n.data = nrow(points) + nrow(clim.back),
-                        n.pres = nrow(points),
-                        n.back = nrow(clim.back))
-    } 
-    
-    if(length(wei) > 1){
-      constants <- list(n.clim = ncol(clim.back),
-                        w = c(rep(1/(median(wei)), nrow(points)), wei),
-                        R = diag(ncol(clim.back)),
-                        n.data = nrow(points) + nrow(clim.back),
-                        n.pres = nrow(points),
-                        n.back = nrow(clim.back))
-    }
-  }
-
-  if(Distance == "euclidean"){
-
-    if(length(wei) == 1){
-      constants <- list(n.clim = ncol(clim.back),
-                        w = c(rep(1/wei, nrow(points)),
-                              rep(wei, nrow(clim.back))),
-                        n.data = nrow(points) + nrow(clim.back),
-                        n.back = nrow(clim.back))
-    } 
-    
-    if(length(wei) > 1){
-      constants <- list(n.clim = ncol(clim.back),
-                        w = c(rep(1/(median(wei)), nrow(points)), wei),
-                        n.data = nrow(points) + nrow(clim.back),
-                        n.back = nrow(clim.back))
-    }
-  }
-
-  # Configure parms, data and inits for model types
+  # Configuring data, constants and parameters ffor each model type 
 
   if(Distance == "mahalanobis"){
 
@@ -252,6 +211,26 @@ ppmve <- function(points = NULL,
       
       data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                    clim = rbind(p.ext, clim.back))
+      
+      if(length(wei) > 1){
+        constants <- list(n.clim = ncol(clim.back),
+                        w = c(rep(1/wei, nrow(points)),
+                              rep(wei, nrow(clim.back))),
+                        R = diag(ncol(clim.back)),
+                        n.data = nrow(points) + nrow(clim.back),
+                        n.pres = nrow(points),
+                        n.back = nrow(clim.back))
+      } 
+    
+      if(length(wei) > 1){
+        constants <- list(n.clim = ncol(clim.back),
+                          w = c(rep(1/(median(wei)), nrow(points)), wei),
+                          R = diag(ncol(clim.back)),
+                          n.data = nrow(points) + nrow(clim.back),
+                          n.pres = nrow(points),
+                          n.back = nrow(clim.back))
+      }
+      
     }
 
     if(CovMat == "locallocal"){
@@ -266,6 +245,25 @@ ppmve <- function(points = NULL,
       
       data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                    clim = rbind(p.ext, clim.back))
+      
+      if(length(wei) > 1){
+         constants <- list(n.clim = ncol(clim.back),
+                          w = c(rep(1/wei, nrow(points)),
+                                rep(wei, nrow(clim.back))),
+                          R = diag(ncol(clim.back)),
+                          n.data = nrow(points) + nrow(clim.back),
+                          n.pres = nrow(points),
+                          n.back = nrow(clim.back))
+      } 
+    
+      if(length(wei) > 1){
+        constants <- list(n.clim = ncol(clim.back),
+                          w = c(rep(1/(median(wei)), nrow(points)), wei),
+                          R = diag(ncol(clim.back)),
+                          n.data = nrow(points) + nrow(clim.back),
+                          n.pres = nrow(points),
+                          n.back = nrow(clim.back))
+      }
     }
 
     if(CovMat == "global"){
@@ -282,6 +280,24 @@ ppmve <- function(points = NULL,
     
       data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                    clim = rbind(p.ext, clim.back))
+      if(length(wei) > 1){
+        constants <- list(n.clim = ncol(clim.back),
+                          w = c(rep(1/wei, nrow(points)),
+                                rep(wei, nrow(clim.back))),
+                          R = diag(ncol(clim.back)),
+                          n.data = nrow(points) + nrow(clim.back),
+                          n.pres = nrow(points),
+                          n.back = nrow(clim.back))
+      } 
+    
+      if(length(wei) > 1){
+        constants <- list(n.clim = ncol(clim.back),
+                          w = c(rep(1/(median(wei)), nrow(points)), wei),
+                          R = diag(ncol(clim.back)),
+                          n.data = nrow(points) + nrow(clim.back),
+                          n.pres = nrow(points),
+                          n.back = nrow(clim.back))
+      }
     }
   }
 
@@ -297,6 +313,20 @@ ppmve <- function(points = NULL,
     
     data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                  clim = rbind(p.ext, clim.back))
+    
+    if(length(wei) == 1){
+      constants <- list(n.clim = ncol(clim.back),
+                        w = c(rep(1/wei, nrow(points)),
+                              rep(wei, nrow(clim.back))),
+                        n.data = nrow(points) + nrow(clim.back))
+    } 
+    
+    if(length(wei) > 1){
+      constants <- list(n.clim = ncol(clim.back),
+                        w = c(rep(1/(median(wei)), 
+                              nrow(points)), wei),
+                        n.data = nrow(points) + nrow(clim.back))
+    }
   }
 
   #Loading the specified Nimble model
