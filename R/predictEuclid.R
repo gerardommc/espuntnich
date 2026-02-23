@@ -29,7 +29,9 @@
 #' }
 #' @export
 
-predict.ppmve.euclidean <- function(object = NULL, newdata = NULL, probs = 0.5){
+predict.ppmve.euclidean <- function(object, 
+                                    newdata = NULL, 
+                                    probs = c(0.0275, 0.5, 0.975)){
 
   if(is.null(object)){
     stop("Please provide a valid ppmve model")

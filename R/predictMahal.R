@@ -31,9 +31,9 @@
 #' @export
 #' 
 
-predict.ppmve.mahalanobis <- function(object = NULL,
+predict.ppmve.mahalanobis <- function(object,
                                       newdata = NULL,
-                                      probs = 0.5){
+                                      probs = c(0.0275, 0.5, 0.975)){
 
   if(is.null(object)){
     stop("Please provide a valid ppmve model")

@@ -195,7 +195,8 @@ ppmve <- function(points = NULL,
 
   # Loading contstants for each model type
   if(Distance == "mahalanobis"){
-    if(length(wei) == 1){
+
+    if(length(wei) > 1){
       constants <- list(n.clim = ncol(clim.back),
                         w = c(rep(1/wei, nrow(points)),
                               rep(wei, nrow(clim.back))),
@@ -203,7 +204,9 @@ ppmve <- function(points = NULL,
                         n.data = nrow(points) + nrow(clim.back),
                         n.pres = nrow(points),
                         n.back = nrow(clim.back))
-    } else {
+    } 
+    
+    if(length(wei) > 1){
       constants <- list(n.clim = ncol(clim.back),
                         w = c(rep(1/(median(wei)), nrow(points)), wei),
                         R = diag(ncol(clim.back)),
@@ -214,13 +217,16 @@ ppmve <- function(points = NULL,
   }
 
   if(Distance == "euclidean"){
+
     if(length(wei) == 1){
       constants <- list(n.clim = ncol(clim.back),
                         w = c(rep(1/wei, nrow(points)),
                               rep(wei, nrow(clim.back))),
                         n.data = nrow(points) + nrow(clim.back),
                         n.back = nrow(clim.back))
-    } else {
+    } 
+    
+    if(length(wei) > 1){
       constants <- list(n.clim = ncol(clim.back),
                         w = c(rep(1/(median(wei)), nrow(points)), wei),
                         n.data = nrow(points) + nrow(clim.back),
@@ -231,6 +237,39 @@ ppmve <- function(points = NULL,
   # Configure parms, data and inits for model types
 
   if(Distance == "mahalanobis"){
+
+    if(CovMat == "local"){
+
+      parms <- c("centroid.pres",
+                  "mu.back",
+                  "tau.pres",
+                  "beta")
+
+      inits <- list(centroid.pres = rep(0, constants$n.clim),
+                    mu.back = rep(0, constants$n.clim),
+                    tau.pres = diag(1, nrow = constants$n.clim),
+                    beta = 0)
+      
+      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                   clim = rbind(p.ext, clim.back))
+    }
+
+    if(CovMat == "locallocal"){
+
+      parms <- c("centroid.pres",
+                  "tau.pres",
+                  "beta")
+
+      inits <- list(centroid.pres = rep(0, constants$n.clim),
+              tau.pres = diag(1, nrow = constants$n.clim),
+              beta = 0)
+      
+      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                   clim = rbind(p.ext, clim.back))
+    }
+
+    if(CovMat == "global"){
+
       parms <- c("centroid.pres",
                   "mu.back",
                   "tau.pres",
@@ -240,9 +279,14 @@ ppmve <- function(points = NULL,
               mu.back = rep(0, constants$n.clim),
               tau.pres = diag(1, nrow = constants$n.clim),
               beta = 0)
+    
+      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                   clim = rbind(p.ext, clim.back))
     }
+  }
 
   if(Distance == "euclidean"){
+
     inits <- list(centroid.pres = rep(0, constants$n.clim),
               tau.pres = rep(1, constants$n.clim),
               beta = 0)
@@ -250,12 +294,10 @@ ppmve <- function(points = NULL,
     parms <- c("centroid.pres",
            "tau.pres",
            "beta")
+    
+    data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                 clim = rbind(p.ext, clim.back))
   }
-
-
-  data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-               clim = rbind(p.ext, clim.back),
-               n.clim = ncol(cov.df[, -(1:2)]))
 
   #Loading the specified Nimble model
   if(Distance == "mahalanobis"){
@@ -293,10 +335,14 @@ ppmve <- function(points = NULL,
   set.seed(seed)
 
   if(parallel){
+
   doParallel::registerDoParallel(cores = cores)
+    
     run <- doParallel::foreach(i = 1:chains) %dopar% {
       nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = thin, samplesAsCodaMCMC = asCoda, nchains = 1, WAIC = F)
     }
+
+    run <- coda::as.mcmc.list(run)
 
     ret.list <- list(model = run,
                      call = list(Distance = Distance,
@@ -347,3 +393,5 @@ ppmve <- function(points = NULL,
     return(ret.list)
   }
 }
+
+  

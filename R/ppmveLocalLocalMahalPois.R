@@ -1,7 +1,6 @@
 LocalLocalMahal <- nimble::nimbleCode({
   for(i in 1:n.clim){
     centroid.pres[i] ~ dnorm(0, 0.1)
-    mu.back[i]  ~ dnorm(0, 1.0E-4)
   }
   
   tau.pres[1:n.clim, 1:n.clim] ~ dwish(R[1:n.clim, 1:n.clim], n.clim + 1)
