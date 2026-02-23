@@ -10,5 +10,5 @@
 #' @export
 
 predict.ppmve <- function(object, ...){
-  NextMethod("predict.ppmve", object)
+  UseMethod("predict.ppmve")
 }
