@@ -212,7 +212,7 @@ ppmve <- function(points = NULL,
       data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                    clim = rbind(p.ext, clim.back))
       
-      if(length(wei) > 1){
+      if(length(wei) == 1){
         constants <- list(n.clim = ncol(clim.back),
                         w = c(rep(1/wei, nrow(points)),
                               rep(wei, nrow(clim.back))),
@@ -244,7 +244,7 @@ ppmve <- function(points = NULL,
       data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                    clim = rbind(p.ext, clim.back))
       
-      if(length(wei) > 1){
+      if(length(wei) == 1){
          constants <- list(n.clim = ncol(clim.back),
                           w = c(rep(1/wei, nrow(points)),
                                 rep(wei, nrow(clim.back))),
@@ -274,7 +274,7 @@ ppmve <- function(points = NULL,
     
       data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                    clim = rbind(p.ext, clim.back))
-      if(length(wei) > 1){
+      if(length(wei) == 1){
         constants <- list(n.clim = ncol(clim.back),
                           w = c(rep(1/wei, nrow(points)),
                                 rep(wei, nrow(clim.back))),
