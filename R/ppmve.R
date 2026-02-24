@@ -218,8 +218,7 @@ ppmve <- function(points = NULL,
                               rep(wei, nrow(clim.back))),
                         R = diag(ncol(clim.back)),
                         n.data = nrow(points) + nrow(clim.back),
-                        n.pres = nrow(points),
-                        n.back = nrow(clim.back))
+                        n.pres = nrow(points))
       } 
     
       if(length(wei) > 1){
@@ -227,8 +226,7 @@ ppmve <- function(points = NULL,
                           w = c(rep(1/(median(wei)), nrow(points)), wei),
                           R = diag(ncol(clim.back)),
                           n.data = nrow(points) + nrow(clim.back),
-                          n.pres = nrow(points),
-                          n.back = nrow(clim.back))
+                          n.pres = nrow(points))
       }
       
     }
@@ -251,18 +249,14 @@ ppmve <- function(points = NULL,
                           w = c(rep(1/wei, nrow(points)),
                                 rep(wei, nrow(clim.back))),
                           R = diag(ncol(clim.back)),
-                          n.data = nrow(points) + nrow(clim.back),
-                          n.pres = nrow(points),
-                          n.back = nrow(clim.back))
+                          n.data = nrow(points) + nrow(clim.back))
       } 
     
       if(length(wei) > 1){
         constants <- list(n.clim = ncol(clim.back),
                           w = c(rep(1/(median(wei)), nrow(points)), wei),
                           R = diag(ncol(clim.back)),
-                          n.data = nrow(points) + nrow(clim.back),
-                          n.pres = nrow(points),
-                          n.back = nrow(clim.back))
+                          n.data = nrow(points) + nrow(clim.back))
       }
     }
 
@@ -286,7 +280,6 @@ ppmve <- function(points = NULL,
                                 rep(wei, nrow(clim.back))),
                           R = diag(ncol(clim.back)),
                           n.data = nrow(points) + nrow(clim.back),
-                          n.pres = nrow(points),
                           n.back = nrow(clim.back))
       } 
     
@@ -295,7 +288,6 @@ ppmve <- function(points = NULL,
                           w = c(rep(1/(median(wei)), nrow(points)), wei),
                           R = diag(ncol(clim.back)),
                           n.data = nrow(points) + nrow(clim.back),
-                          n.pres = nrow(points),
                           n.back = nrow(clim.back))
       }
     }
@@ -413,11 +405,11 @@ ppmve <- function(points = NULL,
 
 
     if(Distance == "mahalanobis"){
-      class(ret.list) <- c("ppmve", Distance)
+      class(ret.list) <- c(Distance, "ppmve")
     }
 
     if(Distance == "euclidean"){
-      class(ret.list) <- c("ppmve", Distance)
+      class(ret.list) <- c(Distance, "ppmve")
     }
 
     return(ret.list)

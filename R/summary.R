@@ -31,7 +31,6 @@ summary.ppmve <- function(model = NULL){
     stop("Please provide a valid ppmve object")
   }
 
-  coda::summary.mcmc(object = model$model$samples)
+  summary(model$model$samples)
 }
-
 
