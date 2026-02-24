@@ -203,14 +203,6 @@ ppmve <- function(points = NULL,
                   "mu.back",
                   "tau.pres",
                   "beta")
-
-      inits <- list(centroid.pres = rep(0, constants$n.clim),
-                    mu.back = rep(0, constants$n.clim),
-                    tau.pres = diag(1, nrow = constants$n.clim),
-                    beta = 0)
-      
-      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                   clim = rbind(p.ext, clim.back))
       
       if(length(wei) == 1){
         constants <- list(n.clim = ncol(clim.back),
@@ -228,7 +220,14 @@ ppmve <- function(points = NULL,
                           n.data = nrow(points) + nrow(clim.back),
                           n.pres = nrow(points))
       }
+
+      inits <- list(centroid.pres = rep(0, constants$n.clim),
+                    mu.back = rep(0, constants$n.clim),
+                    tau.pres = diag(1, nrow = constants$n.clim),
+                    beta = 0)
       
+      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                   clim = rbind(p.ext, clim.back))      
     }
 
     if(CovMat == "locallocal"){
@@ -236,13 +235,6 @@ ppmve <- function(points = NULL,
       parms <- c("centroid.pres",
                   "tau.pres",
                   "beta")
-
-      inits <- list(centroid.pres = rep(0, constants$n.clim),
-              tau.pres = diag(1, nrow = constants$n.clim),
-              beta = 0)
-      
-      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                   clim = rbind(p.ext, clim.back))
       
       if(length(wei) == 1){
          constants <- list(n.clim = ncol(clim.back),
@@ -258,6 +250,14 @@ ppmve <- function(points = NULL,
                           R = diag(ncol(clim.back)),
                           n.data = nrow(points) + nrow(clim.back))
       }
+
+      inits <- list(centroid.pres = rep(0, constants$n.clim),
+              tau.pres = diag(1, nrow = constants$n.clim),
+              beta = 0)
+      
+      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                   clim = rbind(p.ext, clim.back))
+
     }
 
     if(CovMat == "global"){
@@ -266,14 +266,7 @@ ppmve <- function(points = NULL,
                   "mu.back",
                   "tau.pres",
                   "beta")
-
-      inits <- list(centroid.pres = rep(0, constants$n.clim),
-              mu.back = rep(0, constants$n.clim),
-              tau.pres = diag(1, nrow = constants$n.clim),
-              beta = 0)
-    
-      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                   clim = rbind(p.ext, clim.back))
+      
       if(length(wei) == 1){
         constants <- list(n.clim = ncol(clim.back),
                           w = c(rep(1/wei, nrow(points)),
@@ -290,21 +283,22 @@ ppmve <- function(points = NULL,
                           n.data = nrow(points) + nrow(clim.back),
                           n.back = nrow(clim.back))
       }
+
+      inits <- list(centroid.pres = rep(0, constants$n.clim),
+              mu.back = rep(0, constants$n.clim),
+              tau.pres = diag(1, nrow = constants$n.clim),
+              beta = 0)
+    
+      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                   clim = rbind(p.ext, clim.back))
     }
   }
 
   if(Distance == "euclidean"){
 
-    inits <- list(centroid.pres = rep(0, constants$n.clim),
-              tau.pres = rep(1, constants$n.clim),
-              beta = 0)
-
     parms <- c("centroid.pres",
            "tau.pres",
            "beta")
-    
-    data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                 clim = rbind(p.ext, clim.back))
     
     if(length(wei) == 1){
       constants <- list(n.clim = ncol(clim.back),
@@ -319,6 +313,13 @@ ppmve <- function(points = NULL,
                               nrow(points)), wei),
                         n.data = nrow(points) + nrow(clim.back))
     }
+
+    inits <- list(centroid.pres = rep(0, constants$n.clim),
+              tau.pres = rep(1, constants$n.clim),
+              beta = 0)
+    
+    data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                 clim = rbind(p.ext, clim.back))
   }
 
   #Loading the specified Nimble model
