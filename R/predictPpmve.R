@@ -4,6 +4,7 @@
 #' @param object = A model object of class ppmve
 #' @export
 
-predict <- function(object, ...){
-  UseMethod(generic = "predict", object)
+predict.ppmve <- function(object, ...){
+  UseMethod(generic = "predict.ppmve", object)
 }
+
