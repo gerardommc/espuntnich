@@ -26,11 +26,16 @@
 #' }
 #' @export
 
-summary.ppmve <- function(model = NULL){
+summary <- function(model){
+  UseMethod(generic = "summary", object)
+}
+
+summary.ppmve <- function(model){
   if(is.null(model)){
     stop("Please provide a valid ppmve object")
   }
 
   summary(model$model$samples)
 }
+
 

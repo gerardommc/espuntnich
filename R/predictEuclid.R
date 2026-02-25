@@ -41,11 +41,11 @@ predict.ppmve.euclidean <- function(object,
     stop("Please provide a valid data.frame or SpatRaster object")
   }
 
-  if(class(newdata) != "SpatRaster"){
+  if(!inherits(newdata, "SpatRaster")){
     stop("Please provide a SpatRaster object")
   }
 
-  if(class(newdata) == "SpatRaster"){
+  if(inherits(newdata, "SpatRaster")){
     cov.df <- newdata |> as.data.frame(xy = T)
     cov.df1 <- cov.df |> subset(select = c(object$call$covariates)) |> as.matrix()
   }
