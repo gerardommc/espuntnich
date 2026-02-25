@@ -10,7 +10,7 @@
 #' @param Distance =  A character string with values"mahalanobis" or "euclidean", indicating the type of distance to be calculated.
 #' @param niter = A numeric value indicating the number of MCMC iterations.
 #' @param nburnin = A numeric value indicating the number of MCMC iterations to be discarded at the beginning of each chain.
-#' @param thin = A numeric value indicating the interval of MCMC iterations from which posterior values will be sampled
+#' @param nthin = A numeric value indicating the interval of MCMC iterations from which posterior values will be sampled
 #' @param asCoda = Logical, indicating whether the objecct returned by nimble rum is of class coda. This shoule be set to T to use predict methods.
 #' @param chains = A numeric value indicating the number of chains to be run. If convergence diagnostics are to be run, the number should be at least 2.
 #' @param WAIC = Logical, whether to compute the Watanabe--Akaike information criterion, T.
@@ -32,7 +32,7 @@
 #'            Distance = "mahalanobis",
 #'            no.bkgd = 5000,
 #'            niter = 10000,
-#'            thin = 9,
+#'            nthin = 9,
 #'            nburnin = 1000,
 #'            chains = 1)
 #' }
@@ -48,7 +48,7 @@ ppmve <- function(points = NULL,
                   Distance = "mahalanobis", #options = "euclidean"
                   niter = NULL,
                   nburnin = NULL,
-                  thin = NULL,
+                  nthin = NULL,
                   asCoda = T,
                   chains = 2,
                   WAIC = T,
@@ -362,7 +362,7 @@ ppmve <- function(points = NULL,
     doParallel::registerDoParallel(cores = cores)
     
     run <- doParallel::foreach(i = 1:chains) %dopar% {
-      nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = thin, samplesAsCodaMCMC = asCoda, nchains = 1, WAIC = F)
+      nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, nthin = nthin, samplesAsCodaMCMC = asCoda, nchains = 1, WAIC = F)
     }
     
     run <- coda::as.mcmc.list(run)
@@ -374,7 +374,7 @@ ppmve <- function(points = NULL,
                                  covariates = names(covariates),
                                  niter = niter,
                                  nburnin = nburnin,
-                                 thin = thin,
+                                 nthin = nthin,
                                  asCoda = asCoda,
                                  chains = chains,
                                  WAIC = WAIC,
@@ -387,7 +387,7 @@ ppmve <- function(points = NULL,
     
     return(ret.list)
   } else {
-    run <- nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = thin, samplesAsCodaMCMC = asCoda, nchains = chains, WAIC = WAIC)
+    run <- nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, nthin = nthin, samplesAsCodaMCMC = asCoda, nchains = chains, WAIC = WAIC)
     ret.list <- list(model = run,
                      call = list(Distance = Distance,
                                  CovMat = CovMat,
@@ -395,7 +395,7 @@ ppmve <- function(points = NULL,
                                  covariates = covariate.names,
                                  niter = niter,
                                  nburnin = nburnin,
-                                 thin = thin,
+                                 nthin = nthin,
                                  asCoda = asCoda,
                                  chains = chains,
                                  WAIC = WAIC,
