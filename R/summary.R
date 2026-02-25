@@ -27,7 +27,7 @@
 #' @export
 
 summary <- function(model){
-  UseMethod(generic = "summary", object)
+  UseMethod(generic = "summary", model)
 }
 
 summary.ppmve <- function(model){
