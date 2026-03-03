@@ -27,7 +27,7 @@
 #' @export
 #' @method summary.ppmve mahalanobis
 
-summary.ppmve <- function(model){
+summary.ppmve.mahalanobis <- function(model){
   if(is.null(model)){
     stop("Please provide a valid ppmve object")
   }

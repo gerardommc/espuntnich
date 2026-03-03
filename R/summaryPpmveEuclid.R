@@ -26,7 +26,7 @@
 #' @export
 #' @method summary.ppmve euclidean
 
-summary.ppmve <- function(model){
+summary.ppmve.euclidean <- function(model){
   if(is.null(model)){
     stop("Please provide a valid ppmve object")
   }
