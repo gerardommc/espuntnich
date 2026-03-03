@@ -29,7 +29,7 @@
 #' plot(predictions)
 #' }
 #' @export
-#' 
+#' @method predict.ppmve mahalanobis
 
 predict.ppmve.mahalanobis <- function(object,
                                       newdata = NULL,

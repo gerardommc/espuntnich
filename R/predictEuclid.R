@@ -28,6 +28,7 @@
 #' plot(predictions)
 #' }
 #' @export
+#' @method predict.ppmve euclidean
 
 predict.ppmve.euclidean <- function(object, 
                                     newdata = NULL, 

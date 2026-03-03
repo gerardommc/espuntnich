@@ -25,6 +25,7 @@
 #' summary(m)
 #' }
 #' @export
+#' @method summary ppmve
 
 summary.ppmve <- function(model){
   if(is.null(model)){
