@@ -1,5 +1,6 @@
 #' @title Fit an inhomogeneous Poisson Point Process Model as a function of distance to an ellipsoid's centroid
-#' @description
+#' @description Fit a minimum volume elipsoid as a covariate within an inhomogeneous Poisson Point Process Model 
+#' to develop an Ecological Niche Model using point locations and at least two raster covariates.
 #' @param points = A two-column data.frame with names x and y for the presence localities.
 #' @param covariates = A SpatRaster or imList object, containing the covariates.
 #' @param covariate.names = A character vector with the names of the covariaes to be used in the model.

@@ -67,7 +67,8 @@ ppmve(
 An object of class ppmve and the type of distance and covariance matrix used.
 }
 \description{
-Fit an inhomogeneous Poisson Point Process Model as a function of distance to an ellipsoid's centroid
+Fit a minimum volume elipsoid as a covariate within an inhomogeneous Poisson Point Process Model 
+to develop an Ecological Niche Model using point locations and at least two raster covariates.
 }
 \examples{
 \dontrun{
