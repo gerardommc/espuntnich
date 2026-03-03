@@ -7,7 +7,7 @@
 \method{predict}{ppmve}(object, ...)
 }
 \arguments{
-\item{object}{= A model object of class ppmve}
+\item{object}{A model object of class ppmve}
 }
 \description{
 Project a ppmve model onto geographic space
