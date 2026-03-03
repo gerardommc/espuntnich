@@ -28,3 +28,4 @@ Imports:
       espatsmo,
       foreach,
       doParallel
+RoxygenNote: 7.3.3
