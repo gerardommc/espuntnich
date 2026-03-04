@@ -37,7 +37,7 @@
 #' 
 #' p <- read.csv("points.csv")
 #' 
-#' m <- ppmve(points = p,
+#' m <- ppmveDraft(points = p,
 #'            covariates = r,
 #'            covariate.names = names(r),
 #'            CovMat = "local",

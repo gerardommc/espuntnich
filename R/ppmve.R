@@ -362,12 +362,22 @@ ppmve <- function(points = NULL,
     
     doParallel::registerDoParallel(cores = cores)
     
-    run <- foreach::foreach(i = 1:chains) %dopar% {
+    run.list <- foreach::foreach(i = 1:chains) %dopar% {
       nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = nthin, samplesAsCodaMCMC = asCoda, nchains = 1, WAIC = F)
     }
     
-    run <- coda::as.mcmc.list(run)
+    mc.list <- list()
+    for(i in seq_along(run.list)){
+      temp <- run.list[[i]]
+      mc.list[[i]] <- temp$samples
+    }
+
+    names(mc.list) <- paste0("chain", seq_along(run.list))
     
+    run <- run.list[[1]]
+
+    run$samples <- coda::as.mcmc.list(mc.list)
+
     ret.list <- list(model = run,
                      call = list(Distance = Distance,
                                  CovMat = CovMat,
