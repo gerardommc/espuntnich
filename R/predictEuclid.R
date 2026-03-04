@@ -3,9 +3,9 @@
 #' Project a ppmve model onto geographic space. To do this, the user should profide
 #' a fitted model, and the covariates in SpatRaster format with the same name as
 #' used to fit the model.
-#' @param object = A model object of class ppmve
-#' @param newdata = A SpatRaster object with covariate names contained in the covariate.names argument of ppmve function
-#' @param probs = The posterior probability quantiles to be returned by predict.ppmve
+#' @param object A model object of class ppmve
+#' @param newdata A SpatRaster object with covariate names contained in the covariate.names argument of ppmve function
+#' @param probs The posterior probability quantiles to be returned by predict.ppmve
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of distance to the estimated centroids
 #' @examples
 #' \dontrun{
@@ -33,10 +33,6 @@
 predict.ppmve.euclidean <- function(object, 
                                     newdata = NULL, 
                                     probs = c(0.0275, 0.5, 0.975)){
-
-  if(is.null(object)){
-    stop("Please provide a valid ppmve model")
-  }
 
   if(is.null(newdata)){
     stop("Please provide a valid data.frame or SpatRaster object")

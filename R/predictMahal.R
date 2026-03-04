@@ -35,27 +35,18 @@ predict.ppmve.mahalanobis <- function(object,
                                       newdata = NULL,
                                       probs = c(0.0275, 0.5, 0.975)){
 
-  if(is.null(object)){
-    stop("Please provide a valid ppmve model")
-  }
-
   if(is.null(newdata)){
     stop("Please provide a valid data.frame or SpatRaster object")
   }
 
-  if(class(newdata) != "SpatRaster"){
+  if(!inherits(newdata, "SpatRaster")){
     stop("Please provide a SpatRaster object")
   }
   
-  if(class(newdata) == "SpatRaster"){
+  if(inherits(newdata, "SpatRaster")){
     cov.df <- newdata |> as.data.frame(xy = T)
     cov.df1 <- cov.df |> subset(select = c(object$call$covariates)) |> as.matrix()
   }
-
-  if(class(newdata) != "SpatRaster"){
-    stop("Please provide a SpatRaster object")
-  }
-
 
   if(object$call$chains == 1){
     mcl <- object$model$samples |> coda::as.mcmc()

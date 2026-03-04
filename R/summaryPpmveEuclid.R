@@ -3,7 +3,7 @@
 #' This function prints the estimated coefficients of a ppmve model and calculates
 #' probability values for each of the parameter posteriors, relevant
 #' to the type of analysis for which the method has been designed
-#' @param model = A model object of class ppmve
+#' @param model A model object of class ppmve
 #' @return A summary of the posterior samples for the fitted model
 #' @examples
 #' \dontrun{
@@ -27,10 +27,6 @@
 #' @method summary.ppmve euclidean
 
 summary.ppmve.euclidean <- function(model){
-  if(is.null(model)){
-    stop("Please provide a valid ppmve object")
-  }
-
   summary(model$model$samples)
 }
 

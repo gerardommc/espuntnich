@@ -1,8 +1,7 @@
-#' @title Print summary statistics for a ppmve model.
+#' @title Summary method for a ppmve model posterior coefficients.
 #' @description
-#' This function prints the estimated coefficients of a ppmve model and calculates
-#' probability values for each of the parameter posteriors, relevant
-#' to the type of analysis for which the method has been designed
+#' Print the estimated coefficients of a ppmve model and calculates
+#' probability values for each of the parameter posteriors.
 #' @param model A model object of class ppmve
 #' @return A summary of the posterior samples for the fitted model
 #' @export
