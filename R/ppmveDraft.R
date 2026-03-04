@@ -307,8 +307,15 @@ ppmveDraft <- function(points = NULL,
                       tau.pres = diag(1, nrow = constants$n.clim),
                       beta = 0)
         
-        data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                    clim = rbind(p.ext, clim.back))
+        if(is.null(priors)){
+          data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                       clim = rbind(p.ext, clim.back))
+        }
+        
+        if(!is.null(priors)){
+          data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                       clim = rbind(p.ext, clim.back))
+        }
       }
     }
     
@@ -514,12 +521,23 @@ ppmveDraft <- function(points = NULL,
     
     doParallel::registerDoParallel(cores = cores)
     
-    run <- doParallel::foreach(i = 1:chains) %dopar% {
-      nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = nthin, samplesAsCodaMCMC = asCoda, nchains = 1, WAIC = F)
+    run.list <- foreach::foreach(i = 1:chains, .packages = "nimble") %dopar% {
+      ch <- nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = nthin, samplesAsCodaMCMC = asCoda, nchains = 1, WAIC = WAIC)
+      return(ch)
     }
     
-    run <- coda::as.mcmc.list(run)
+    mc.list <- list()
+    for(i in seq_along(run.list)){
+      temp <- run.list[[i]]
+      mc.list[[i]] <- temp$samples
+    }
     
+    names(mc.list) <- paste0("chain", seq_along(run.list))
+    
+    run <- run.list[[1]]
+    
+    run$samples <- coda::as.mcmc.list(mc.list)
+
     ret.list <- list(model = run,
                      call = list(Distance = Distance,
                                  CovMat = CovMat,
