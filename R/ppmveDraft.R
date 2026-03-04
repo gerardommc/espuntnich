@@ -50,7 +50,7 @@
 #' }
 #' @export
 
-ppmve <- function(points = NULL,
+ppmveDraft <- function(points = NULL,
                   covariates = NULL,
                   covariate.names = NULL,
                   no.bkgd = 5000,

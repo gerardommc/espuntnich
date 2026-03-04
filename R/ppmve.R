@@ -362,7 +362,7 @@ ppmve <- function(points = NULL,
     
     doParallel::registerDoParallel(cores = cores)
     
-    run <- doParallel::foreach(i = 1:chains) %dopar% {
+    run <- foreach::foreach(i = 1:chains) %dopar% {
       nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = nthin, samplesAsCodaMCMC = asCoda, nchains = 1, WAIC = F)
     }
     
