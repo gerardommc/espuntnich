@@ -50,494 +50,380 @@
 #' }
 #' @export
 
-ppmveDraft <- function(points = NULL,
-                  covariates = NULL,
-                  covariate.names = NULL,
-                  no.bkgd = 5000,
-                  bias.data = NULL,
-                  bias.correction = NULL, #options = "background", "weights"
-                  background.points = NULL,
-                  samples.data = list(presence.data = NULL,
-                                      background.data = NULL,
-                                      area.weights = NULL),
-                  priors = NULL,
-                  CovMat = "local",
-                  Distance = "mahalanobis", #options = "euclidean"
-                  niter = NULL,
-                  nburnin = NULL,
-                  nthin = NULL,
-                  asCoda = T,
-                  chains = 2,
-                  WAIC = T,
-                  parallel = F,
-                  cores = NULL,
-                  seed = 123,
-                  weight.bias.conf = list(
-                    nsim =  39,
-                    positive = TRUE,
-                    kernel = "gaussian",
-                    sigma = NULL,
-                    varcov = NULL,
-                    weights = NULL,
-                    edge = TRUE)){
+ppmveDraft <-  function(points = NULL,
+                        covariates = NULL,
+                        covariate.names = NULL,
+                        no.bkgd = 5000,
+                        bias.data = NULL,
+                        bias.correction = NULL, #options = "background", "weights"
+                        background.points = NULL,
+                        samples.data = list(presence.data = NULL,
+                                            background.data = NULL,
+                                            area.weights = NULL),
+                        priors = NULL,
+                        CovMat = "local",
+                        Distance = "mahalanobis", #options = "euclidean"
+                        niter = NULL,
+                        nburnin = NULL,
+                        nthin = NULL,
+                        asCoda = T,
+                        chains = 2,
+                        WAIC = T,
+                        parallel = F,
+                        cores = NULL,
+                        seed = 123,
+                        weight.bias.conf = list(nsim =  39,
+                                                positive = TRUE,
+                                                kernel = "gaussian",
+                                                sigma = NULL,
+                                                varcov = NULL,
+                                                weights = NULL,
+                                                edge = TRUE)){
   
   
-  if(is.null(points) | is.null(covariates) | is.null(covariate.names)){
-    stop("Please specify valid inputs for points, covariates and covariate.names")
+  if(is.null(points) | is.null(covariates) | is.null(covariate.names) | is.null(samples.data$presence.data) | is.null(samples.data$background.data)){
+    stop("Please specify valid inputs for points, covariates, covariate.names or samples.data")
+  }
+
+  if(!is.null(bias.correction) & !is.null(samples.data)){
+    stop("Samples with data is incompatible with bias correction methods, please set either to NULL")
+  }
+
+  if(!is.null(background.points) & !is.null(bias.data) & bias.correction == "background"){
+    stop("Bias correction is incompatible with user-defined background points, please set either to NULL")
   }
   
-  names(points) <- c("x", "y")
-  
-  covariates <- covariates[[covariate.names]]
-  
-  cov.df <- as.data.frame(covariates, xy = T)
-  p.ext <- terra::extract(covariates, points, ID = F, na.rm = T) |> na.omit() |> as.data.frame()
-  
-  iml <- espatsmo::imFromStack(covariates)
-  win <- spatstat.geom::as.owin(iml[[1]])
-  p.pp <- spatstat.geom::ppp(x = points$x, y = points$y, window = win)
-  
-  #Calculating weights
-  Q <- spatstat.geom::pixelquad(p.pp)
-  
-  beg <- Q$w |> length() - iml[[1]][] |>length() + 1
-  en <- Q$w |> length()
+#Preparing presence and background data
+  if(!is.null(points) & !is.null(covariates)){
 
-  if(is.null(samples.data$presence.data)){
-    if(is.null(bias.correction)){
-      samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
-      wei <- max(Q$w)
-    }
-    
-    if(!is.null(bias.correction)){
+      names(points) <- c("x", "y")
       
-      #Background data with bias correction
-      #Bias correction based on are weights
+      covariates <- covariates[[covariate.names]]
+      
+      cov.df <- as.data.frame(covariates, xy = T)
+      p.ext <- terra::extract(covariates, points, ID = F, na.rm = T) |> na.omit() |> as.data.frame()
+      
+      iml <- espatsmo::imFromStack(covariates)
+      win <- spatstat.geom::as.owin(iml[[1]])
+      p.pp <- spatstat.geom::ppp(x = points$x, y = points$y, window = win)
+      
+      #Calculating weights
+      Q <- spatstat.geom::pixelquad(p.pp)
+      
+      beg <- Q$w |> length() - iml[[1]][] |>length() + 1
+      en <- Q$w |> length()
+
+
+    if(is.null(bias.correction)){
+      if(is.null(background.points)){
+        samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
+        wei <- max(Q$w)
+      }
+
+      if(!is.null(background.points)){
+        clim.back <- terra::extract(background.points, covariates, ID = F, na.rm = T) |> na.omit() |> as.data.frame()
+        wei <- max(Q$w)
+      }
+    }
+      
+    if(!is.null(bias.correction)){
+        
+        #Background data with bias correction
+        #Bias correction based on are weights
       if(bias.correction == "weights"){
         if(class(bias.data) == "data.frame"){
-          Qa <- espatsmo::replaceQAreas(Q = Q,
-                                        bias.data = bias.data,
-                                        im = iml[[1]],
-                                        nsim =  weight.bias.conf$nsim,
-                                        positive = weight.bias.conf$positive,
-                                        kernel = weight.bias.conf$kernel,
-                                        sigma = weight.bias.conf$sigma,
-                                        varcov = weight.bias.conf$sigma,
-                                        weights = weight.bias.conf$weights,
-                                        edge = weight.bias.conf$edge)
-          
-          area.weights <- iml[[1]]
-          area.weights[] <- Qa$w[beg:en]
-          weights.r <- area.weights |> terra::rast()
-          
-          samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
-          
-          wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])[,2]
-          
-          nas <- wei |> is.na()
-          
-          samp <- samp[!nas]
-          
-          wei <- wei[!nas]
+            Qa <- espatsmo::replaceQAreas(Q = Q,
+                                          bias.data = bias.data,
+                                          im = iml[[1]],
+                                          nsim =  weight.bias.conf$nsim,
+                                          positive = weight.bias.conf$positive,
+                                          kernel = weight.bias.conf$kernel,
+                                          sigma = weight.bias.conf$sigma,
+                                          varcov = weight.bias.conf$sigma,
+                                          weights = weight.bias.conf$weights,
+                                          edge = weight.bias.conf$edge)
+            
+            area.weights <- iml[[1]]
+            area.weights[] <- Qa$w[beg:en]
+            weights.r <- area.weights |> terra::rast()
+            
+            samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
+            
+            wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])[,2]
+            
+            nas <- wei |> is.na()
+            
+            samp <- samp[!nas]
+            
+            wei <- wei[!nas]
         }
-        
+          
         if(class(bias.data) == "SpatRaster"){
-          
-          bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
-          bias.df <- as.data.frame(bias.data, xy = TRUE)
-          ids.bias <- sample(1:nrow(bias.df), no.bkgd, prob = bias.df[, 3]) |> sort()
-          locs.bias <- bias.df[ids.bias, ]
-          
-          Qa <- espatsmo::replaceQAreas(Q = Q,
-                                        bias.data = locs.bias,
-                                        im = iml[[1]],
-                                        nsim =  weight.bias.conf$nsim,
-                                        positive = weight.bias.conf$positive,
-                                        kernel = weight.bias.conf$kernel,
-                                        sigma = weight.bias.conf$sigma,
-                                        varcov = weight.bias.conf$sigma,
-                                        weights = weight.bias.conf$weights,
-                                        edge = weight.bias.conf$edge)
-          
-          area.weights <- iml[[1]]
-          area.weights[] <- Qa$w[beg:en]
-          weights.r <- area.weights |> terra::rast()
-          samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
-          wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])
-          nas <- wei |> is.na()
-          samp <- samp[!nas]
-          wei <- wei[!nas]
+            
+            bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
+            bias.df <- as.data.frame(bias.data, xy = TRUE)
+            ids.bias <- sample(1:nrow(bias.df), no.bkgd, prob = bias.df[, 3]) |> sort()
+            locs.bias <- bias.df[ids.bias, ]
+            
+            Qa <- espatsmo::replaceQAreas(Q = Q,
+                                          bias.data = locs.bias,
+                                          im = iml[[1]],
+                                          nsim =  weight.bias.conf$nsim,
+                                          positive = weight.bias.conf$positive,
+                                          kernel = weight.bias.conf$kernel,
+                                          sigma = weight.bias.conf$sigma,
+                                          varcov = weight.bias.conf$sigma,
+                                          weights = weight.bias.conf$weights,
+                                          edge = weight.bias.conf$edge)
+            
+            area.weights <- iml[[1]]
+            area.weights[] <- Qa$w[beg:en]
+            weights.r <- area.weights |> terra::rast()
+            samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
+            wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])
+            nas <- wei |> is.na()
+            samp <- samp[!nas]
+            wei <- wei[!nas]
         }
       }
-      
-      #Bias correction based on location of  background data
+        
+        #Bias correction based on location of  background data
       if(bias.correction == "background"){
         if(class(bias.data) == "data.frame"){
-          bias.ppp <- spatstat.geom::ppp(x = bias.data$x, y = bias.data$y, window = win)
-          dens.r <- spatstat.geom::density.ppp(bias.ppp,
-                                              positive = weight.bias.conf$positive,
-                                              kernel = weight.bias.conf$kernel,
-                                              sigma = weight.bias.conf$sigma,
-                                              varcov = weight.bias.conf$varcov,
-                                              weights = weight.bias.conf$weights,
-                                              edge = weight.bias.conf$edge) |> terra::rast()
-          
-          dens.df <- as.data.frame(dens.r, xy = TRUE)
-          
-          area.weights <- iml[[1]]
-          area.weights[] <- Q$w[beg:en]
-          weights.r <- area.weights |> terra::rast()
-          
-          samp <- sample(1:nrow(dens.df), no.bkgd, prob = dens.df[, 3]) |> sort()
-          
-          wei <- max(Q$w)
+            bias.ppp <- spatstat.geom::ppp(x = bias.data$x, y = bias.data$y, window = win)
+            dens.r <- spatstat.geom::density.ppp(bias.ppp,
+                                                positive = weight.bias.conf$positive,
+                                                kernel = weight.bias.conf$kernel,
+                                                sigma = weight.bias.conf$sigma,
+                                                varcov = weight.bias.conf$varcov,
+                                                weights = weight.bias.conf$weights,
+                                                edge = weight.bias.conf$edge) |> terra::rast()
+            
+            dens.df <- as.data.frame(dens.r, xy = TRUE)
+            
+            area.weights <- iml[[1]]
+            area.weights[] <- Q$w[beg:en]
+            weights.r <- area.weights |> terra::rast()
+            
+            samp <- sample(1:nrow(dens.df), no.bkgd, prob = dens.df[, 3]) |> sort()
+            
+            wei <- max(Q$w)
         }
-        
+          
         if(class(bias.data) == "SpatRaster"){
-          bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
-          
-          bias.df <- as.data.frame(bias.data, xy = TRUE)
-          
-          area.weights <- iml[[1]]
-          area.weights[] <- Q$w[beg:en]
-          weights.r <- area.weights |> terra::rast()
-          
-          samp <- sample(1:nrow(bias.df), no.bkgd, prob = bias.df[, 3]) |> sort()
-          
-          wei <- max(Q$w)
+            bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
+            
+            bias.df <- as.data.frame(bias.data, xy = TRUE)
+            
+            area.weights <- iml[[1]]
+            area.weights[] <- Q$w[beg:en]
+            weights.r <- area.weights |> terra::rast()
+            
+            samp <- sample(1:nrow(bias.df), no.bkgd, prob = bias.df[, 3]) |> sort()
+            
+            wei <- max(Q$w)
         }
       }
+            clim.back <- cov.df[samp, -c(1:2)]
+    }
+  }
+    
+  if(!is.null(samples.data$presence.data) & !is.null(samples.data$background.data)){
+      clim.back <- samples.data$background.data
+      wei <- samples.data$area.weights
+      p.ext <- samples.data$presence.data
+  }
+
+  # Configuring data, constants and parameters ffor each model type 
+  
+  if(Distance == "mahalanobis"){
+
+    if(CovMat == "global"){
+      
+      parms <- c("centroid.pres",
+                "mu.back",
+                "tau.pres",
+                "beta")
+      
+      if(is.null(priors)){
+        constants <- list(n.clim = ncol(clim.back),
+                          R = diag(ncol(clim.back)),
+                          n.data = nrow(points) + nrow(clim.back),
+                          n.back = nrow(clim.back),
+                          cent.mean = rep(0, ncol(clim.back)),
+                          cent.prec = rep(0.1, ncol(clim.back)),
+                          mu.b.mean = rep(0, ncol(clim.back)),
+                          mu.b.prec = rep(1.0E-4, ncol(clim.back)),
+                          beta.mean = 0,
+                          beta.prec = 1.0E-4)
+      }
+        
+      if(!is.null(priors)){
+          constants <- list(n.clim = ncol(clim.back),
+                            R = priors$R,
+                            n.data = nrow(points) + nrow(clim.back),
+                            n.back = nrow(clim.back),
+                            cent.mean = piors$cent.mean,
+                            cent.prec = priors$cent.prec,
+                            mu.b.mean = priors$mu.b.mean,
+                            mu.b.prec = priors$mu.b.prec,
+                            beta.mean = priors$beta.mean,
+                            beta.prec = priors$beta.prec)            
+      }
+
+      if(length(wei) == 1){
+          constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
+      }
+      
+      if(length(wei) > 1){
+          constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+      }
+              
+      inits <- list(centroid.pres = constants$cent.mean,
+                    mu.back = constants$mu.b.mean,
+                    tau.pres = constants$R,
+                    beta = constants$beta.mean)
+      
+        data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                      clim = rbind(p.ext, clim.back))
     }
     
-    clim.back <- cov.df[samp, -c(1:2)]
+    if(CovMat == "local"){
 
-      # Configuring data, constants and parameters ffor each model type 
-  
-    if(Distance == "mahalanobis"){
+      parms <- c("centroid.pres",
+                "mu.back",
+                "tau.pres",
+                "beta")
       
-      if(CovMat == "local"){
-
-        parms <- c("centroid.pres",
-                  "mu.back",
-                  "tau.pres",
-                  "beta")
-        
-        if(is.null(priors)){
-            constants <- list(n.clim = ncol(clim.back),
-                  R = diag(ncol(clim.back)),
-                  n.data = nrow(points) + nrow(clim.back),
-                  n.pres = nrow(points),
-                  cent.mean = rep(0, ncol(clim.back)),
-                  cent.prec = rep(0.1, ncol(clim.back)),
-                  mu.b.mean = rep(0, ncol(clim.back)),
-                  mu.b.prec = rep(1.0E-4, ncol(clim.back)),
-                  beta.mean = 0,
-                  beta.prec = 1.0E-4)
-          }
-
-          if(!is.null(priors)){
-            constants <- list(n.clim = ncol(clim.back),
-                  R = priors$R,
-                  n.data = nrow(points) + nrow(clim.back),
-                  n.pres = nrow(points),
-                  cent.mean = piors$cent.mean,
-                  cent.prec = priors$cent.prec,
-                  mu.b.mean = priors$mu.b.mean,
-                  mu.b.prec = priors$mu.b.prec,
-                  beta.mean = priors$beta.mean,
-                  beta.prec = priors$beta.prec)            
-          }
-
-        if(length(wei) == 1){
-            constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
-        }
-        
-        if(length(wei) > 1){
-            constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
-        }
-        
-        inits <- list(centroid.pres = constants$cent.mean,
-                      mu.back = constants$mu.b.mean,
-                      tau.pres = constants$R,
-                      beta = constants$beta.mean)
-        
-        data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                    clim = rbind(p.ext, clim.back))      
-      }
-      
-      if(CovMat == "locallocal"){
-        
-        parms <- c("centroid.pres",
-                  "tau.pres",
-                  "beta")
-        
-        if(is.null(priors)){
+      if(is.null(priors)){
           constants <- list(n.clim = ncol(clim.back),
                 R = diag(ncol(clim.back)),
                 n.data = nrow(points) + nrow(clim.back),
+                n.pres = nrow(points),
                 cent.mean = rep(0, ncol(clim.back)),
                 cent.prec = rep(0.1, ncol(clim.back)),
+                mu.b.mean = rep(0, ncol(clim.back)),
+                mu.b.prec = rep(1.0E-4, ncol(clim.back)),
                 beta.mean = 0,
                 beta.prec = 1.0E-4)
         }
 
         if(!is.null(priors)){
-          constants <- list(n.clim = ncol(clim.back),,
+          constants <- list(n.clim = ncol(clim.back),
                 R = priors$R,
                 n.data = nrow(points) + nrow(clim.back),
+                n.pres = nrow(points),
                 cent.mean = piors$cent.mean,
                 cent.prec = priors$cent.prec,
+                mu.b.mean = priors$mu.b.mean,
+                mu.b.prec = priors$mu.b.prec,
                 beta.mean = priors$beta.mean,
-                beta.prec = priors$beta.prec)
+                beta.prec = priors$beta.prec)            
         }
 
-        if(length(wei) == 1){
-            constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
-        }
-        
-        if(length(wei) > 1){
-            constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
-        }
-        
-        inits <- list(centroid.pres = constants$cent.mean,
-                      tau.pres = constants$R,
-                      beta = constants$beta.mean)
-        
-        data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                    clim = rbind(p.ext, clim.back))
-        
+      if(length(wei) == 1){
+          constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
       }
       
-      if(CovMat == "global"){
-        
-        parms <- c("centroid.pres",
-                  "mu.back",
-                  "tau.pres",
-                  "beta")
-        
-        if(is.null(priors)){
-          constants <- list(n.clim = ncol(clim.back),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(points) + nrow(clim.back),
-                            n.back = nrow(clim.back),
-                            cent.mean = rep(0, ncol(clim.back)),
-                            cent.prec = rep(0.1, ncol(clim.back)),
-                            mu.b.mean = rep(0, ncol(clim.back)),
-                            mu.b.prec = rep(1.0E-4, ncol(clim.back)),
-                            beta.mean = 0,
-                            beta.prec = 1.0E-4)
-        }
-          
-        if(!is.null(priors)){
-            constants <- list(n.clim = ncol(clim.back),
-                              R = priors$R,
-                              n.data = nrow(points) + nrow(clim.back),
-                              n.back = nrow(clim.back),
-                              cent.mean = piors$cent.mean,
-                              cent.prec = priors$cent.prec,
-                              mu.b.mean = priors$mu.b.mean,
-                              mu.b.prec = priors$mu.b.prec,
-                              beta.mean = priors$beta.mean,
-                              beta.prec = priors$beta.prec)            
-        }
-
-        if(length(wei) == 1){
-            constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
-        }
-        
-        if(length(wei) > 1){
-            constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
-        }
-               
-        inits <- list(centroid.pres = constants$cent.mean,
-                      mu.back = constants$mu.b.mean,
-                      tau.pres = constants$R,
-                      beta = constants$beta.mean)
-        
-          data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                       clim = rbind(p.ext, clim.back))
-	               clim = rbind(p.ext, clim.back))
-        }
+      if(length(wei) > 1){
+          constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
       }
+      
+      inits <- list(centroid.pres = constants$cent.mean,
+                    mu.back = constants$mu.b.mean,
+                    tau.pres = constants$R,
+                    beta = constants$beta.mean)
+      
+      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                  clim = rbind(p.ext, clim.back))      
     }
     
-    if(Distance == "euclidean"){
+    if(CovMat == "locallocal"){
       
       parms <- c("centroid.pres",
                 "tau.pres",
                 "beta")
       
       if(is.null(priors)){
-          constants <- list(n.clim = ncol(clim.back),
-                            n.data = nrow(points) + nrow(clim.back),
-                            cent.mean = rep(0, ncol(clim.back)),
-                            cent.prec = rep(0.1, ncol(clim.back)),
-                            tau.min = rep(0, ncol(clim.back)),
-                            tau.max = rep(100, ncol(clim.back)),
-                            beta.mean = 0,
-                            beta.prec = 1.0E-4)
-        }
+        constants <- list(n.clim = ncol(clim.back),
+              R = diag(ncol(clim.back)),
+              n.data = nrow(points) + nrow(clim.back),
+              cent.mean = rep(0, ncol(clim.back)),
+              cent.prec = rep(0.1, ncol(clim.back)),
+              beta.mean = 0,
+              beta.prec = 1.0E-4)
+      }
 
-        if(!is.null(priors)){
-          constants <- list(n.clim = ncol(clim.back),
-                            n.data = nrow(points) + nrow(clim.back),
-                            cent.mean = priors$cent.mean,
-                            cent.prec = priors$cent.prec,
-                            tau.min = priors$tau.min,
-                            tau.max = priors$tau.max,
-                            beta.mean = priors$beta.mean,
-                            beta.prec = priors$beta.prec)
-        } 
-      
-      if(length(wei == 1)){
-        constats$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
+      if(!is.null(priors)){
+        constants <- list(n.clim = ncol(clim.back),,
+              R = priors$R,
+              n.data = nrow(points) + nrow(clim.back),
+              cent.mean = piors$cent.mean,
+              cent.prec = priors$cent.prec,
+              beta.mean = priors$beta.mean,
+              beta.prec = priors$beta.prec)
+      }
+
+      if(length(wei) == 1){
+          constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
       }
       
-      if(length(wei > 1)){
-        constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+      if(length(wei) > 1){
+          constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
       }
       
       inits <- list(centroid.pres = constants$cent.mean,
-                    tau.pres = rep(1, constatns$n.clim),
+                    tau.pres = constants$R,
                     beta = constants$beta.mean)
       
       data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                   clim = rbind(p.ext, clim.back))
+      
     }
   }
-
-  if(!is.null(samples.data$presence.data)){
-    clim.back <- samples.data$background.data
-    wei <- samples.data$area.weights
-    p.ext <- samples.data$presence.data
-  # Configuring data, constants and parameters ffor each model type 
   
-    if(Distance == "mahalanobis"){
-      
-      if(CovMat == "local"){
-        
-        parms <- c("centroid.pres",
-                  "mu.back",
-                  "tau.pres",
-                  "beta")
-        
-        if(length(wei) == 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/wei, nrow(points)),
-                                  rep(wei, nrow(clim.back))),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(p.ext) + nrow(clim.back),
-                            n.pres = nrow(p.ext))
-        } 
-        
-        if(length(wei) > 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/(median(wei)), nrow(points)), wei),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(p.ext) + nrow(clim.back),
-                            n.pres = nrow(p.ext))
-        }
-        
-        inits <- list(centroid.pres = rep(0, constants$n.clim),
-                      mu.back = rep(0, constants$n.clim),
-                      tau.pres = diag(1, nrow = constants$n.clim),
-                      beta = 0)
-        
-        data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                    clim = rbind(p.ext, clim.back))      
+  if(Distance == "euclidean"){
+    
+    parms <- c("centroid.pres",
+              "tau.pres",
+              "beta")
+    
+    if(is.null(priors)){
+        constants <- list(n.clim = ncol(clim.back),
+                          n.data = nrow(points) + nrow(clim.back),
+                          cent.mean = rep(0, ncol(clim.back)),
+                          cent.prec = rep(0.1, ncol(clim.back)),
+                          tau.min = rep(0, ncol(clim.back)),
+                          tau.max = rep(100, ncol(clim.back)),
+                          beta.mean = 0,
+                          beta.prec = 1.0E-4)
       }
-      
-      if(CovMat == "locallocal"){
-        
-        parms <- c("centroid.pres",
-                  "tau.pres",
-                  "beta")
-        
-        if(length(wei) == 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/wei, nrow(p.ext)),
-                                  rep(wei, nrow(clim.back))),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(p.ext) + nrow(clim.back))
-        } 
-        
-        if(length(wei) > 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/(median(wei)), nrow(p.ext)), wei),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(points) + nrow(clim.back))
-        }
-        
-        inits <- list(centroid.pres = rep(0, constants$n.clim),
-                      tau.pres = diag(1, nrow = constants$n.clim),
-                      beta = 0)
-        
-        data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                    clim = rbind(p.ext, clim.back))
-        
-      }
-      
-      if(CovMat == "global"){
-        
-        parms <- c("centroid.pres",
-                  "mu.back",
-                  "tau.pres",
-                  "beta")
-        
-        if(length(wei) == 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/wei, nrow(p.ext)),
-                                  rep(wei, nrow(clim.back))),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(p.ext) + nrow(clim.back),
-                            n.back = nrow(clim.back))
-        } 
-        
-        if(length(wei) > 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/(median(wei)), nrow(p.ext)), wei),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(p.ext) + nrow(clim.back),
-                            n.back = nrow(clim.back))
-        }
-        
-        inits <- list(centroid.pres = rep(0, constants$n.clim),
-                      mu.back = rep(0, constants$n.clim),
-                      tau.pres = diag(1, nrow = constants$n.clim),
-                      beta = 0)
-        
-        data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                    clim = rbind(p.ext, clim.back))
-      }
+
+      if(!is.null(priors)){
+        constants <- list(n.clim = ncol(clim.back),
+                          n.data = nrow(points) + nrow(clim.back),
+                          cent.mean = priors$cent.mean,
+                          cent.prec = priors$cent.prec,
+                          tau.min = priors$tau.min,
+                          tau.max = priors$tau.max,
+                          beta.mean = priors$beta.mean,
+                          beta.prec = priors$beta.prec)
+      } 
+    
+    if(length(wei == 1)){
+      constats$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
     }
     
-    if(Distance == "euclidean"){
-      
-      parms <- c("centroid.pres",
-                "tau.pres",
-                "beta")
-      
-      if(length(wei) == 1){
-        constants <- list(n.clim = ncol(clim.back),
-                          w = c(rep(1/wei, nrow(points)),
-                                rep(wei, nrow(clim.back))),
-                          n.data = nrow(points) + nrow(clim.back))
-      } 
-      
-      if(length(wei) > 1){
-        constants <- list(n.clim = ncol(clim.back),
-                          w = c(rep(1/(median(wei)), 
-                                    nrow(points)), wei),
-                          n.data = nrow(points) + nrow(clim.back))
-      }
-      
-      inits <- list(centroid.pres = rep(0, constants$n.clim),
-                    tau.pres = rep(1, constants$n.clim),
-                    beta = 0)
-      
-      data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                  clim = rbind(p.ext, clim.back))
+    if(length(wei > 1)){
+      constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
     }
+    
+    inits <- list(centroid.pres = constants$cent.mean,
+                  tau.pres = rep(1, constatns$n.clim),
+                  beta = constants$beta.mean)
+    
+    data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
+                clim = rbind(p.ext, clim.back))
   }
   
   #Loading the specified Nimble model
