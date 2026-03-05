@@ -482,31 +482,25 @@ ppmveDraft <-  function(points = NULL,
     
     run$samples <- coda::as.mcmc.list(mc.list)
 
+    if(!is.null(background.points)){
+      num.back <- nrow(background.points)
+      b.points <- background.points
+    }
+
+    if(!is.null(samples.data)){
+      num.back <- nrow(samples.data$background.data)
+      b.points <- NULL
+    }
+
+    if(is.null(background.points) & is.null(samples.data)){
+      num.back <- no.bkgd
+      b.points <- cov.df[samp, c(1:2)]
+    }
+
     ret.list <- list(model = run,
                      call = list(Distance = Distance,
                                  CovMat = CovMat,
-                                 no.bkgd = no.bkgd,
-                                 covariates = names(covariates),
-                                 niter = niter,
-                                 nburnin = nburnin,
-                                 nthin = nthin,
-                                 asCoda = asCoda,
-                                 chains = chains,
-                                 WAIC = WAIC,
-                                 parallel = parallel,
-                                 cores = cores,
-                                 seed = seed),
-                     bkgd.points = cov.df[samp, c(1:2)])
-    
-    class(ret.list) <- c("ppmve", Distance, CovMat)
-    
-    return(ret.list)
-  } else {
-    run <- nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = nthin, samplesAsCodaMCMC = asCoda, nchains = chains, WAIC = WAIC)
-    ret.list <- list(model = run,
-                     call = list(Distance = Distance,
-                                 CovMat = CovMat,
-                                 no.bkgd = no.bkgd,
+                                 no.bkgd = num.back,
                                  covariates = covariate.names,
                                  niter = niter,
                                  nburnin = nburnin,
@@ -517,7 +511,44 @@ ppmveDraft <-  function(points = NULL,
                                  parallel = parallel,
                                  cores = cores,
                                  seed = seed),
-                     bkgd.points = cov.df[samp, c(1:2)])
+                     bkgd.points = b.points)
+    
+    class(ret.list) <- c("ppmve", Distance, CovMat)
+    
+    return(ret.list)
+  } else {
+    run <- nimble::runMCMC(cMCMC, niter = niter, nburnin = nburnin, thin = nthin, samplesAsCodaMCMC = asCoda, nchains = chains, WAIC = WAIC)
+
+    if(!is.null(background.points)){
+      num.back <- nrow(background.points)
+      b.points <- background.points
+    }
+
+    if(!is.null(samples.data)){
+      num.back <- nrow(samples.data$background.data)
+      b.points <- NULL
+    }
+
+    if(is.null(background.points) & is.null(samples.data)){
+      num.back <- no.bkgd
+      b.points <- cov.df[samp, c(1:2)]
+    }
+
+    ret.list <- list(model = run,
+                     call = list(Distance = Distance,
+                                 CovMat = CovMat,
+                                 no.bkgd = num.back,
+                                 covariates = covariate.names,
+                                 niter = niter,
+                                 nburnin = nburnin,
+                                 nthin = nthin,
+                                 asCoda = asCoda,
+                                 chains = chains,
+                                 WAIC = WAIC,
+                                 parallel = parallel,
+                                 cores = cores,
+                                 seed = seed),
+                     bkgd.points = b.points)
     
     
     if(Distance == "mahalanobis"){
