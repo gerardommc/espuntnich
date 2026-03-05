@@ -216,33 +216,50 @@ ppmveDraft <- function(points = NULL,
     if(Distance == "mahalanobis"){
       
       if(CovMat == "local"){
-        
+
         parms <- c("centroid.pres",
                   "mu.back",
                   "tau.pres",
                   "beta")
         
+        if(is.null(priors)){
+            constants <- list(n.clim = ncol(clim.back),
+                  R = diag(ncol(clim.back)),
+                  n.data = nrow(points) + nrow(clim.back),
+                  n.pres = nrow(points),
+                  cent.mean = rep(0, ncol(clim.back)),
+                  cent.prec = rep(0.1, ncol(clim.back)),
+                  mu.b.mean = rep(0, ncol(clim.back)),
+                  mu.b.prec = rep(1.0E-4, ncol(clim.back)),
+                  beta.mean = 0,
+                  beta.prec = 1.0E-4)
+          }
+
+          if(!is.null(priors)){
+            constants <- list(n.clim = ncol(clim.back),
+                  R = priors$R,
+                  n.data = nrow(points) + nrow(clim.back),
+                  n.pres = nrow(points),
+                  cent.mean = piors$cent.mean,
+                  cent.prec = priors$cent.prec,
+                  mu.b.mean = priors$mu.b.mean,
+                  mu.b.prec = priors$mu.b.prec,
+                  beta.mean = priors$beta.mean,
+                  beta.prec = priors$beta.prec)            
+          }
+
         if(length(wei) == 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/wei, nrow(points)),
-                                  rep(wei, nrow(clim.back))),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(points) + nrow(clim.back),
-                            n.pres = nrow(points))
-        } 
-        
-        if(length(wei) > 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/(median(wei)), nrow(points)), wei),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(points) + nrow(clim.back),
-                            n.pres = nrow(points))
+            constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
         }
         
-        inits <- list(centroid.pres = rep(0, constants$n.clim),
-                      mu.back = rep(0, constants$n.clim),
-                      tau.pres = diag(1, nrow = constants$n.clim),
-                      beta = 0)
+        if(length(wei) > 1){
+            constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+        }
+        
+        inits <- list(centroid.pres = constants$cent.mean,
+                      mu.back = constants$mu.b.mean,
+                      tau.pres = constants$R,
+                      beta = constants$beta.mean)
         
         data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                     clim = rbind(p.ext, clim.back))      
@@ -254,24 +271,37 @@ ppmveDraft <- function(points = NULL,
                   "tau.pres",
                   "beta")
         
+        if(is.null(priors)){
+          constants <- list(n.clim = ncol(clim.back),
+                R = diag(ncol(clim.back)),
+                n.data = nrow(points) + nrow(clim.back),
+                cent.mean = rep(0, ncol(clim.back)),
+                cent.prec = rep(0.1, ncol(clim.back)),
+                beta.mean = 0,
+                beta.prec = 1.0E-4)
+        }
+
+        if(!is.null(priors)){
+          constants <- list(n.clim = ncol(clim.back),,
+                R = priors$R,
+                n.data = nrow(points) + nrow(clim.back),
+                cent.mean = piors$cent.mean,
+                cent.prec = priors$cent.prec,
+                beta.mean = priors$beta.mean,
+                beta.prec = priors$beta.prec)
+        }
+
         if(length(wei) == 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/wei, nrow(points)),
-                                  rep(wei, nrow(clim.back))),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(points) + nrow(clim.back))
-        } 
-        
-        if(length(wei) > 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/(median(wei)), nrow(points)), wei),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(points) + nrow(clim.back))
+            constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
         }
         
-        inits <- list(centroid.pres = rep(0, constants$n.clim),
-                      tau.pres = diag(1, nrow = constants$n.clim),
-                      beta = 0)
+        if(length(wei) > 1){
+            constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+        }
+        
+        inits <- list(centroid.pres = constants$cent.mean,
+                      tau.pres = constants$R,
+                      beta = constants$beta.mean)
         
         data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                     clim = rbind(p.ext, clim.back))
@@ -285,36 +315,48 @@ ppmveDraft <- function(points = NULL,
                   "tau.pres",
                   "beta")
         
-        if(length(wei) == 1){
+        if(is.null(priors)){
           constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/wei, nrow(points)),
-                                  rep(wei, nrow(clim.back))),
                             R = diag(ncol(clim.back)),
                             n.data = nrow(points) + nrow(clim.back),
-                            n.back = nrow(clim.back))
-        } 
+                            n.back = nrow(clim.back),
+                            cent.mean = rep(0, ncol(clim.back)),
+                            cent.prec = rep(0.1, ncol(clim.back)),
+                            mu.b.mean = rep(0, ncol(clim.back)),
+                            mu.b.prec = rep(1.0E-4, ncol(clim.back)),
+                            beta.mean = 0,
+                            beta.prec = 1.0E-4)
+        }
+          
+        if(!is.null(priors)){
+            constants <- list(n.clim = ncol(clim.back),
+                              R = priors$R,
+                              n.data = nrow(points) + nrow(clim.back),
+                              n.back = nrow(clim.back),
+                              cent.mean = piors$cent.mean,
+                              cent.prec = priors$cent.prec,
+                              mu.b.mean = priors$mu.b.mean,
+                              mu.b.prec = priors$mu.b.prec,
+                              beta.mean = priors$beta.mean,
+                              beta.prec = priors$beta.prec)            
+        }
+
+        if(length(wei) == 1){
+            constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
+        }
         
         if(length(wei) > 1){
-          constants <- list(n.clim = ncol(clim.back),
-                            w = c(rep(1/(median(wei)), nrow(points)), wei),
-                            R = diag(ncol(clim.back)),
-                            n.data = nrow(points) + nrow(clim.back),
-                            n.back = nrow(clim.back))
+            constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
         }
+               
+        inits <- list(centroid.pres = constants$cent.mean,
+                      mu.back = constants$mu.b.mean,
+                      tau.pres = constants$R,
+                      beta = constants$beta.mean)
         
-        inits <- list(centroid.pres = rep(0, constants$n.clim),
-                      mu.back = rep(0, constants$n.clim),
-                      tau.pres = diag(1, nrow = constants$n.clim),
-                      beta = 0)
-        
-        if(is.null(priors)){
           data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                        clim = rbind(p.ext, clim.back))
-        }
-        
-        if(!is.null(priors)){
-          data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                       clim = rbind(p.ext, clim.back))
+	               clim = rbind(p.ext, clim.back))
         }
       }
     }
@@ -325,23 +367,39 @@ ppmveDraft <- function(points = NULL,
                 "tau.pres",
                 "beta")
       
-      if(length(wei) == 1){
-        constants <- list(n.clim = ncol(clim.back),
-                          w = c(rep(1/wei, nrow(points)),
-                                rep(wei, nrow(clim.back))),
-                          n.data = nrow(points) + nrow(clim.back))
-      } 
+      if(is.null(priors)){
+          constants <- list(n.clim = ncol(clim.back),
+                            n.data = nrow(points) + nrow(clim.back),
+                            cent.mean = rep(0, ncol(clim.back)),
+                            cent.prec = rep(0.1, ncol(clim.back)),
+                            tau.min = rep(0, ncol(clim.back)),
+                            tau.max = rep(100, ncol(clim.back)),
+                            beta.mean = 0,
+                            beta.prec = 1.0E-4)
+        }
+
+        if(!is.null(priors)){
+          constants <- list(n.clim = ncol(clim.back),
+                            n.data = nrow(points) + nrow(clim.back),
+                            cent.mean = priors$cent.mean,
+                            cent.prec = priors$cent.prec,
+                            tau.min = priors$tau.min,
+                            tau.max = priors$tau.max,
+                            beta.mean = priors$beta.mean,
+                            beta.prec = priors$beta.prec)
+        } 
       
-      if(length(wei) > 1){
-        constants <- list(n.clim = ncol(clim.back),
-                          w = c(rep(1/(median(wei)), 
-                                    nrow(points)), wei),
-                          n.data = nrow(points) + nrow(clim.back))
+      if(length(wei == 1)){
+        constats$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
       }
       
-      inits <- list(centroid.pres = rep(0, constants$n.clim),
-                    tau.pres = rep(1, constants$n.clim),
-                    beta = 0)
+      if(length(wei > 1)){
+        constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+      }
+      
+      inits <- list(centroid.pres = constants$cent.mean,
+                    tau.pres = rep(1, constatns$n.clim),
+                    beta = constants$beta.mean)
       
       data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
                   clim = rbind(p.ext, clim.back))
