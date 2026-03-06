@@ -1,10 +1,10 @@
 Euclid <- nimble::nimbleCode({
   for(i in 1:n.clim){
-    centroid.pres[i] ~ dnorm(0, 0.1)
-    tau.pres[i]  ~ dunif(0, 100)
+    centroid.pres[i] ~ dnorm(cent.mean[i], cent.prec[i])
+    tau.pres[i]  ~ dunif(tau.min[i], tau.max[i])
   }
   
-  beta ~ dnorm(0, 1.0E-3)
+  beta ~ dnorm(beta.mean, beta.tau)
   
   #Centroid likelihood
   for(i in 1:n.data){

@@ -21,7 +21,7 @@
 #'            nburnin = 1000,
 #'            chains = 1)
 #' 
-#' summary(m)
+#' summary.ppmve(m)
 #' }
 #' @export
 #' @method summary.ppmve euclidean

@@ -1,7 +1,7 @@
 GlobalMahal <- nimble::nimbleCode({
   for(i in 1:n.clim){
-    centroid.pres[i] ~ dnorm(0, 0.1)
-    mu.back[i]  ~ dnorm(0, 1.0E-4)
+    centroid.pres[i] ~ dnorm(cent.mean[i], cent.prec[i])
+    mu.back[i]  ~ dnorm(mu.b.mean[i], mu.b.prec[i])
   }
   
   tau.pres[1:n.clim, 1:n.clim] ~ dwish(R[1:n.clim, 1:n.clim], n.clim + 1)
@@ -10,7 +10,7 @@ GlobalMahal <- nimble::nimbleCode({
     clim[j, 1:n.clim] ~ dmnorm(mu.back[1:n.clim], tau.pres[1:n.clim, 1:n.clim])
   }
   
-  beta ~ dnorm(0, 1.0E-3)
+  beta ~ dnorm(beta.mean, beta.prec)
   
   #Centroid likelihood
   for(i in 1:n.data){

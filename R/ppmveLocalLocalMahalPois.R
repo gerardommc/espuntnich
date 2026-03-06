@@ -1,11 +1,11 @@
 LocalLocalMahal <- nimble::nimbleCode({
   for(i in 1:n.clim){
-    centroid.pres[i] ~ dnorm(0, 0.1)
+    centroid.pres[i] ~ dnorm(cent.mean[i], cent.prec[i])
   }
   
   tau.pres[1:n.clim, 1:n.clim] ~ dwish(R[1:n.clim, 1:n.clim], n.clim + 1)
   
-  beta ~ dnorm(0, 1.0E-4)
+  beta ~ dnorm(beta.mean, beta.prec)
   
   #Centroid likelihood
   for(i in 1:n.data){
