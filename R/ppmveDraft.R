@@ -81,15 +81,15 @@ ppmveDraft <-  function(points = NULL,
                                                 edge = TRUE)){
   
   
-  if(is.null(points) | is.null(covariates) | is.null(covariate.names) | is.null(samples.data$presence.data) | is.null(samples.data$background.data)){
+  if(is.null(points) | is.null(covariates) | is.null(covariate.names) & is.null(samples.data$presence.data) & is.null(samples.data$background.data)){
     stop("Please specify valid inputs for points, covariates, covariate.names or samples.data")
   }
-
+  
   if(!is.null(bias.correction) & !is.null(samples.data)){
     stop("Samples with data is incompatible with bias correction methods, please set either to NULL")
   }
-
-  if(!is.null(background.points) & !is.null(bias.data) & bias.correction == "background"){
+  
+  if(!is.null(background.points) & !is.null(bias.data) & !is.null(bias.correction)){
     stop("Bias correction is incompatible with user-defined background points, please set either to NULL")
   }
   
@@ -118,6 +118,7 @@ ppmveDraft <-  function(points = NULL,
       if(is.null(background.points)){
         samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
         wei <- max(Q$w)
+        clim.back <- cov.df[samp, -c(1:2)]
       }
 
       if(!is.null(background.points)){
