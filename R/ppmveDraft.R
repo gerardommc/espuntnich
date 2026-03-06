@@ -122,7 +122,16 @@ ppmveDraft <-  function(points = NULL,
       }
 
       if(!is.null(background.points)){
-        clim.back <- terra::extract(background.points, covariates, ID = F, na.rm = T) |> na.omit() |> as.data.frame()
+
+        if(!inherits(background.points, "matrix") & !inherits(background.points, "data.frame")){
+          stop("Please provide background.points as a two-column data.frame")
+        }
+
+        if(inherits(background.points, "matrix")){
+          background.points <- as.data.frame(background.points)
+        }
+
+        clim.back <- terra::extract(covariates, background.points, ID = F, na.rm = T) |> na.omit() |> as.data.frame()
         wei <- max(Q$w)
       }
     }
@@ -430,20 +439,20 @@ ppmveDraft <-  function(points = NULL,
   #Loading the specified Nimble model
   if(Distance == "mahalanobis"){
     if(CovMat == "global"){
-      modelCode <- GlobalMahal
+      modelCode <- GlobalMahalDraft
     }
     
     if(CovMat == "local"){
-      modelCode <- LocalMahal
+      modelCode <- LocalMahalDraft
     }
     
     if(CovMat == "locallocal"){
-      modelCode <- LocalLocalMahal
+      modelCode <- LocalLocalMahalDraft
     }
   }
   
   if(Distance == "euclidean"){
-    modelCode <- Euclid
+    modelCode <- EuclidDraft
   }
   
   model <- nimble::nimbleModel(code = modelCode,
