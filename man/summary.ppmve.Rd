@@ -2,7 +2,7 @@
 % Please edit documentation in R/summaryPpmve.R
 \name{summary.ppmve}
 \alias{summary.ppmve}
-\title{Print summary statistics for a ppmve model.}
+\title{Summary method for a ppmve model posterior coefficients.}
 \usage{
 \method{summary}{ppmve}(model)
 }
@@ -13,7 +13,6 @@
 A summary of the posterior samples for the fitted model
 }
 \description{
-This function prints the estimated coefficients of a ppmve model and calculates
-probability values for each of the parameter posteriors, relevant
-to the type of analysis for which the method has been designed
+Print the estimated coefficients of a ppmve model and calculates
+probability values for each of the parameter posteriors.
 }

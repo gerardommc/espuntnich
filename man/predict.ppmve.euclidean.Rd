@@ -7,11 +7,11 @@
 \method{predict.ppmve}{euclidean}(object, newdata = NULL, probs = c(0.0275, 0.5, 0.975))
 }
 \arguments{
-\item{object}{= A model object of class ppmve}
+\item{object}{A model object of class ppmve}
 
-\item{newdata}{= A SpatRaster object with covariate names contained in the covariate.names argument of ppmve function}
+\item{newdata}{A SpatRaster object with covariate names contained in the covariate.names argument of ppmve function}
 
-\item{probs}{= The posterior probability quantiles to be returned by predict.ppmve}
+\item{probs}{The posterior probability quantiles to be returned by predict.ppmve}
 }
 \value{
 Returns a single or multiple band SpatRaster object, representing point intensity as a function of distance to the estimated centroids

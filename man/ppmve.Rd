@@ -11,6 +11,9 @@ ppmve(
   no.bkgd = 5000,
   bias.data = NULL,
   bias.correction = NULL,
+  background.points = NULL,
+  samples.data = list(presence.data = NULL, background.data = NULL, area.weights = NULL),
+  priors = NULL,
   CovMat = "local",
   Distance = "mahalanobis",
   niter = NULL,
@@ -27,17 +30,31 @@ ppmve(
 )
 }
 \arguments{
-\item{points}{= A two-column data.frame with names x and y for the presence localities.}
+\item{points}{A two-column data.frame with names x and y for the presence localities.}
 
-\item{covariates}{= A SpatRaster or imList object, containing the covariates.}
+\item{covariates}{A SpatRaster or imList object, containing the covariates.}
 
-\item{covariate.names}{= A character vector with the names of the covariaes to be used in the model.}
+\item{covariate.names}{A character vector with the names of the covariaes to be used in the model.}
 
-\item{no.bkgd}{= The number of background points to be drawn from the covariates.}
+\item{no.bkgd}{The number of background points to be drawn from the covariates.}
 
-\item{bias.data}{= The data to be used to correct observation bias. This data could be a data frame of fieldwork sampling localities, or a raster layer describing the variability of observation effort.}
+\item{bias.data}{The data to be used to correct observation bias. This data could be a data frame of fieldwork sampling localities, or a raster layer describing the variability of observation effort.}
 
-\item{bias.correction}{= A character string with values "background" or "weights", indicating the bias correction method. For "background", bias is done by selecting sampling localities from more intensely sampled areas. For weights, the size of the areas are modified according to the ratio of uniform vs. realised sampling effort.}
+\item{bias.correction}{A character string with values "background" or "weights", indicating the bias correction method. For "background", bias is done by selecting sampling localities from more intensely sampled areas. For weights, the size of the areas are modified according to the ratio of uniform vs. realised sampling effort.}
+
+\item{background.points}{A two-column data.frame with the x and y coordinates of background or quadrature points used to sample covariate space.}
+
+\item{samples.data}{A list containing three data slots: (1) presence.data, a data.frame where each column contains the environmental conditions of each presence point, and where column names
+must contain the names supplied in covariate names; (2) background.data,a data.frame where each column contains the environmental conditions of background locations, and where 
+column names must contain the supplied covariate names; (3) area.weights, a single numeric value or vector containing the size of covariate pixels.}
+
+\item{priors}{By default it is NULL, and flat priors are assumed for all centroid coordinates or precision components. If more informative priors are desired, a list with data slots
+named after each parameter estimated by the supported models must be provided. The variations for mahalanobis distance models are (with parameters which must be contained in the list 
+between brackets): (1) local (centroid.pres, mu.back, tau.pres, beta); (2) locallocal (centroid.pres, tau.pres, beta); (3) global (centroid.pres, mu.back, tau.pres, beta). "centroid.pres",
+and "mu.back" must be a vector of length equal to the number of covariate.names, whereas "tau.pres" must be an inverse covariance square matrix, with the same number of rows and colums, 
+matching the number of covariate.names, and parameter "beta" is a single, real-valued number which is the model intercept. 
+For the euclidean model, the estimated parameters are "centroid.pres", "tau.pres" and "beta". "centrod.pres" is a real-valued vector equal to those used in teh mahalanobis models; "tau.pres" is a 
+positive real-valued vector of length equal to the length of "covariate.names", and "beta" is the same as in the mahalanobis models.}
 
 \item{CovMat}{= A character string with values "local" or "global", to configure whether the covariance matrix is parameterised from the point process only or separately from values at sampling localities. This argument is only relevant for "mahalanobis" distance.}
 
@@ -76,7 +93,7 @@ r <- terra::rast(paste0("bio",c(1, 2, 12, 17), ".tif")) |> scale()
 
 p <- read.csv("points.csv")
 
-m <- ppmve(points = p,
+m <- ppmveDraft(points = p,
            covariates = r,
            covariate.names = names(r),
            CovMat = "local",

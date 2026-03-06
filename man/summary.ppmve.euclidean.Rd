@@ -7,7 +7,7 @@
 \method{summary.ppmve}{euclidean}(model)
 }
 \arguments{
-\item{model}{= A model object of class ppmve}
+\item{model}{A model object of class ppmve}
 }
 \value{
 A summary of the posterior samples for the fitted model
@@ -33,6 +33,6 @@ m <- ppmve(points = p,
            nburnin = 1000,
            chains = 1)
 
-summary(m)
+summary.ppmve(m)
 }
 }

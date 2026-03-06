@@ -10,5 +10,5 @@
 \item{object}{A model object of class ppmve}
 }
 \description{
-Project a ppmve model onto geographic space
+Project a ppmve model onto geographic space.
 }
