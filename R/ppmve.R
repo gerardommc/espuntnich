@@ -10,7 +10,8 @@
 #' @param background.points A two-column data.frame with the x and y coordinates of background or quadrature points used to sample covariate space.
 #' @param samples.data A list containing three data slots: (1) presence.data, a data.frame where each column contains the environmental conditions of each presence point, and where column names
 #' must contain the names supplied in covariate names; (2) background.data,a data.frame where each column contains the environmental conditions of background locations, and where 
-#' column names must contain the supplied covariate names; (3) area.weights, a single numeric value or vector containing the size of covariate pixels. 
+#' column names must contain the supplied covariate names; (3) area.weights, a single numeric value or vector containing the size of covariate pixels. For example: list(presence.data = NULL,
+#' background.data = NULL, area.weights = NULL)
 #' @param priors By default it is NULL, and flat priors are assumed for all centroid coordinates or precision components. If more informative priors are desired, a list with data slots
 #' named after each parameter estimated by the supported models must be provided. The variations for mahalanobis distance models are (with parameters which must be contained in the list 
 #' between brackets): (1) local (centroid.pres, mu.back, tau.pres, beta); (2) locallocal (centroid.pres, tau.pres, beta); (3) global (centroid.pres, mu.back, tau.pres, beta). "centroid.pres",
@@ -37,7 +38,7 @@
 #' 
 #' p <- read.csv("points.csv")
 #' 
-#' m <- ppmveDraft(points = p,
+#' m <- ppmve(points = p,
 #'            covariates = r,
 #'            covariate.names = names(r),
 #'            CovMat = "local",
@@ -57,9 +58,7 @@ ppmve <-  function(points = NULL,
                         bias.data = NULL,
                         bias.correction = NULL, #options = "background", "weights"
                         background.points = NULL,
-                        samples.data = list(presence.data = NULL,
-                                            background.data = NULL,
-                                            area.weights = NULL),
+                        samples.data = NULL,
                         priors = NULL,
                         CovMat = "local",
                         Distance = "mahalanobis", #options = "euclidean"
