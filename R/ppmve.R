@@ -19,18 +19,18 @@
 #' matching the number of covariate.names, and parameter "beta" is a single, real-valued number which is the model intercept. 
 #' For the euclidean model, the estimated parameters are "centroid.pres", "tau.pres" and "beta". "centrod.pres" is a real-valued vector equal to those used in teh mahalanobis models; "tau.pres" is a 
 #' positive real-valued vector of length equal to the length of "covariate.names", and "beta" is the same as in the mahalanobis models.
-#' @param CovMat = A character string with values "local" or "global", to configure whether the covariance matrix is parameterised from the point process only or separately from values at sampling localities. This argument is only relevant for "mahalanobis" distance.
-#' @param Distance =  A character string with values"mahalanobis" or "euclidean", indicating the type of distance to be calculated.
-#' @param niter = A numeric value indicating the number of MCMC iterations.
-#' @param nburnin = A numeric value indicating the number of MCMC iterations to be discarded at the beginning of each chain.
-#' @param nthin = A numeric value indicating the interval of MCMC iterations from which posterior values will be sampled
-#' @param asCoda = Logical, indicating whether the objecct returned by nimble rum is of class coda. This shoule be set to T to use predict methods.
-#' @param chains = A numeric value indicating the number of chains to be run. If convergence diagnostics are to be run, the number should be at least 2.
-#' @param WAIC = Logical, whether to compute the Watanabe--Akaike information criterion, T.
-#' @param parallel = Logical, whether to run chains in parallel, F.
-#' @param cores = Numeric value indicating the number of cores to be used for running the chains. Should be equal to "chains".
-#' @param seed = Numeric, idincating the random seed generator number, 123.
-#' @param weight.bias.conf = A list with default entries, nsim =  39, positive = TRUE, kernel = "gaussian", sigma = NULL, varcov = NULL, weights = NULL, edge = TRUE, which are used to configure the replaceQAreas function and density.ppm, only relevant if bias.correction = "weights" and the class of bias.data is data.frame
+#' @param CovMat A character string with values "local" or "global", to configure whether the covariance matrix is parameterised from the point process only or separately from values at sampling localities. This argument is only relevant for "mahalanobis" distance.
+#' @param Distance A character string with values"mahalanobis" or "euclidean", indicating the type of distance to be calculated.
+#' @param niter A numeric value indicating the number of MCMC iterations.
+#' @param nburnin A numeric value indicating the number of MCMC iterations to be discarded at the beginning of each chain.
+#' @param nthin A numeric value indicating the interval of MCMC iterations from which posterior values will be sampled
+#' @param asCoda Logical, indicating whether the objecct returned by nimble rum is of class coda. This shoule be set to T to use predict methods.
+#' @param chains A numeric value indicating the number of chains to be run. If convergence diagnostics are to be run, the number should be at least 2.
+#' @param WAIC Logical, whether to compute the Watanabe--Akaike information criterion, T.
+#' @param parallel Logical, whether to run chains in parallel, F.
+#' @param cores Numeric value indicating the number of cores to be used for running the chains. Should be equal to "chains".
+#' @param seed Numeric, idincating the random seed generator number, 123.
+#' @param weight.bias.conf = A list with default entries, positive = TRUE, kernel = "gaussian", sigma = NULL, varcov = NULL, weights = NULL, edge = TRUE, which are used to configure the replaceQAreas function and density.ppm, only relevant if bias.correction = "weights" and the class of bias.data is data.frame
 #' @return An object of class ppmve and the type of distance and covariance matrix used.
 #' @examples
 #' \dontrun{
@@ -71,8 +71,7 @@ ppmve <-  function(points = NULL,
                         parallel = F,
                         cores = NULL,
                         seed = 123,
-                        weight.bias.conf = list(nsim =  39,
-                                                positive = TRUE,
+                        weight.bias.conf = list(positive = TRUE,
                                                 kernel = "gaussian",
                                                 sigma = NULL,
                                                 varcov = NULL,
@@ -144,7 +143,6 @@ ppmve <-  function(points = NULL,
             Qa <- espatsmo::replaceQAreas(Q = Q,
                                           bias.data = bias.data,
                                           im = iml[[1]],
-                                          nsim =  weight.bias.conf$nsim,
                                           positive = weight.bias.conf$positive,
                                           kernel = weight.bias.conf$kernel,
                                           sigma = weight.bias.conf$sigma,
@@ -177,7 +175,6 @@ ppmve <-  function(points = NULL,
             Qa <- espatsmo::replaceQAreas(Q = Q,
                                           bias.data = locs.bias,
                                           im = iml[[1]],
-                                          nsim =  weight.bias.conf$nsim,
                                           positive = weight.bias.conf$positive,
                                           kernel = weight.bias.conf$kernel,
                                           sigma = weight.bias.conf$sigma,
