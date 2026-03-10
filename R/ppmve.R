@@ -34,9 +34,9 @@
 #' @return An object of class ppmve and the type of distance and covariance matrix used.
 #' @examples
 #' \dontrun{
-#' r <- terra::rast(paste0("bio",c(1, 2, 12, 17), ".tif")) |> scale()
+#' r <- terra::rast("inst/extdata/ChelsaBio.tif") |> scale()
 #' 
-#' p <- read.csv("points.csv")
+#' p <- read.csv("inst/extdata/points.csv")
 #' 
 #' m <- ppmve(points = p,
 #'            covariates = r,
