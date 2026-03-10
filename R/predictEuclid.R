@@ -19,7 +19,7 @@
 #'            Distance = "euclidean",
 #'            no.bkgd = 5000,
 #'            niter = 10000,
-#'            thin = 9,
+#'            nthin = 9,
 #'            nburnin = 1000,
 #'            chains = 1) 
 #' 
