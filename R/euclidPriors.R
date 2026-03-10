@@ -41,7 +41,7 @@ euclidPiors <- function(cent.mean = NULL,
     stop("Please make sure that all values of tau.min, tau.mx and beta.prec are positive")
   }
 
-  if(length(beta.mean) > 1 | length(beta.brec) > 1){
+  if(length(beta.mean) > 1 | length(beta.prec) > 1){
     stop("Please provide a sigle value for beta.mean and beta.prec")
   }
   

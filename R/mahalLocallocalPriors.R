@@ -25,13 +25,9 @@ mahalLocallocalPriors <- function(mu.b.mean = NULL,
                                   beta.mean = NULL,
                                   beta.prec = NULL){
   
-  if(length(cent.mean) != length(cent.prec) | dim(R)[1] != dim(R)[2] | length(mu.b.mean) != length(mu.b.prec)){
+  if(dim(R)[1] != dim(R)[2] | length(mu.b.mean) != length(mu.b.prec)){
     stop("Please make sure that cent.mean, cent.prec, mu.b.mean and mu.b.prec contain the same  number of elements.\n
      The number of rows and columns of R must alsoo be equal to the number of elements of the previous priors")
-  }
-
-  if(any(cent.prec < 0)){
-    stop("Please make sure that all values of cent.prec are positive")
   }
 
   if(any(mu.b.prec < 0)){
@@ -46,9 +42,7 @@ mahalLocallocalPriors <- function(mu.b.mean = NULL,
     stop("Please provide a sigle value for beta.mean and beta.prec")
   }
   
-  priors <- list(cent.mean = cent.mean,
-                 cent.prec = cent.prec,
-                 mu.b.mean = mu.b.mean,
+  priors <- list(mu.b.mean = mu.b.mean,
                  mu.b.prec = mu.b.prec,
                  R = R,
                  beta.mean = beta.mean,

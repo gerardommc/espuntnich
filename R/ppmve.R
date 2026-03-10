@@ -99,7 +99,7 @@ ppmve <-  function(points = NULL,
       covariates <- covariates[[covariate.names]]
       
       cov.df <- as.data.frame(covariates, xy = T)
-      p.ext <- terra::extract(covariates, points, ID = F, na.rm = T) |> na.omit() |> as.data.frame()
+      p.ext <- terra::extract(covariates, points, ID = F, na.rm = T) |> stats::na.omit() |> as.data.frame()
       
       iml <- espatsmo::imFromStack(covariates)
       win <- spatstat.geom::as.owin(iml[[1]])
@@ -129,7 +129,7 @@ ppmve <-  function(points = NULL,
           background.points <- as.data.frame(background.points)
         }
 
-        clim.back <- terra::extract(covariates, background.points, ID = F, na.rm = T) |> na.omit() |> as.data.frame()
+        clim.back <- terra::extract(covariates, background.points, ID = F, na.rm = T) |> stats::na.omit() |> as.data.frame()
         wei <- max(Q$w)
       }
     }
@@ -139,7 +139,7 @@ ppmve <-  function(points = NULL,
         #Background data with bias correction
         #Bias correction based on are weights
       if(bias.correction == "weights"){
-        if(class(bias.data) == "data.frame"){
+        if(inherits(bias.data, "data.frame")){
             Qa <- espatsmo::replaceQAreas(Q = Q,
                                           bias.data = bias.data,
                                           im = iml[[1]],
@@ -165,7 +165,7 @@ ppmve <-  function(points = NULL,
             wei <- wei[!nas]
         }
           
-        if(class(bias.data) == "SpatRaster"){
+        if(inherits(bias.data, "SpatRaster")){
             
             bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
             bias.df <- as.data.frame(bias.data, xy = TRUE)
@@ -195,7 +195,7 @@ ppmve <-  function(points = NULL,
         
         #Bias correction based on location of  background data
       if(bias.correction == "background"){
-        if(class(bias.data) == "data.frame"){
+        if(inherits(bias.data, "data.frame")){
             bias.ppp <- spatstat.geom::ppp(x = bias.data$x, y = bias.data$y, window = win)
             dens.r <- spatstat.geom::density.ppp(bias.ppp,
                                                 positive = weight.bias.conf$positive,
@@ -216,7 +216,7 @@ ppmve <-  function(points = NULL,
             wei <- max(Q$w)
         }
           
-        if(class(bias.data) == "SpatRaster"){
+        if(inherits(bias.data, "SpatRaster")){
             bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
             
             bias.df <- as.data.frame(bias.data, xy = TRUE)
@@ -282,7 +282,7 @@ ppmve <-  function(points = NULL,
       }
       
       if(length(wei) > 1){
-          constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+          constants$w <- c(rep(1/(stats::median(wei)), nrow(points)), wei)
       }
               
       inits <- list(centroid.pres = constants$cent.mean,
@@ -332,7 +332,7 @@ ppmve <-  function(points = NULL,
       }
       
       if(length(wei) > 1){
-          constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+          constants$w <- c(rep(1/(stats::median(wei)), nrow(points)), wei)
       }
       
       inits <- list(centroid.pres = constants$cent.mean,
@@ -375,7 +375,7 @@ ppmve <-  function(points = NULL,
       }
       
       if(length(wei) > 1){
-          constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+          constants$w <- c(rep(1/(stats::median(wei)), nrow(points)), wei)
       }
       
       inits <- list(centroid.pres = constants$cent.mean,
@@ -421,11 +421,11 @@ ppmve <-  function(points = NULL,
     }
     
     if(length(wei > 1)){
-      constants$w <- c(rep(1/(median(wei)), nrow(points)), wei)
+      constants$w <- c(rep(1/(stats::median(wei)), nrow(points)), wei)
     }
     
     inits <- list(centroid.pres = constants$cent.mean,
-                  tau.pres = rep(1, constatns$n.clim),
+                  tau.pres = rep(1, constants$n.clim),
                   beta = constants$beta.mean)
     
     data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
