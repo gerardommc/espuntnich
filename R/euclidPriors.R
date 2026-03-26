@@ -20,7 +20,7 @@
 #'                        beta.prec = 1.0E-4)
 #' @export
 
-euclidPiors <- function(cent.mean = NULL,
+euclidPriors <- function(cent.mean = NULL,
                         cent.prec = NULL,
                         tau.min = NULL,
                         tau.max = NULL,

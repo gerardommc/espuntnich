@@ -416,7 +416,7 @@ ppmve <-  function(points = NULL,
       } 
     
     if(length(wei == 1)){
-      constats$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
+      constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
     }
     
     if(length(wei > 1)){

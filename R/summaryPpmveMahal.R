@@ -13,7 +13,7 @@
 #' m <- ppmve(points = p,
 #'            covariates = r,
 #'            covariate.names = names(r),
-#'            CovMat = "local"
+#'            CovMat = "local",
 #'            Distance = "mahalanobis",
 #'            no.bkgd = 5000,
 #'            niter = 10000,

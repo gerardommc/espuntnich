@@ -77,7 +77,7 @@ predict.ppmve.euclidean <- function(object,
         beta <- coefs[[i]]["beta", ] |> mean()
         tau.mat <- coefs[[i]][paste0("tau.pres[", 1:ncol(cov.df1), "]"), ] |> rowMeans() |> diag()
 
-        md <- base::mahalanobis(cov.df1, center = mu, cov = tau.mat)
+        md <- stats::mahalanobis(cov.df1, center = mu, cov = tau.mat)
         md.ex <- exp(beta-md/2)
 
         return(md.ex)
@@ -96,7 +96,7 @@ predict.ppmve.euclidean <- function(object,
       beta <- coefs["beta", ] |> mean()
       tau.mat <- coefs[paste0("tau.pres[", 1:ncol(cov.df1), "]"), ] |> rowMeans() |> diag()
 
-      md <- base::mahalanobis(cov.df1, center = mu, cov = tau.mat)
+      md <- stats::mahalanobis(cov.df1, center = mu, cov = tau.mat)
       md.ex <- exp(beta-md/2)
 
       preds <- data.frame(cov.df[, c("x", "y")], md.ex) |> terra::rast()

@@ -15,7 +15,7 @@
 #' m <- ppmve(points = p,
 #'            covariates = r,
 #'            covariate.names = names(r),
-#'            CovMat = "local"
+#'            CovMat = "local",
 #'            Distance = "mahalanobis",
 #'            no.bkgd = 5000,
 #'            niter = 10000,
@@ -81,7 +81,7 @@ predict.ppmve.mahalanobis <- function(object,
       tau <- coefs[[i]][paste0("tau.pres[", tau.names$i, ", ",tau.names$j, "]"), ] |> rowMeans()
       tau.mat <- matrix(tau, nrow = ncol(cov.df1), ncol = ncol(cov.df1))
 
-      md <- base::mahalanobis(cov.df1, center = mu, cov = tau.mat)
+      md <- stats::mahalanobis(cov.df1, center = mu, cov = tau.mat)
       md.ex <- exp(beta-md/2)
 
       return(md.ex)
@@ -101,7 +101,7 @@ predict.ppmve.mahalanobis <- function(object,
     tau <- coefs[paste0("tau.pres[", tau.names$i, ", ",tau.names$j, "]"), ] |> rowMeans()
     tau.mat <- matrix(tau, nrow = ncol(cov.df1), ncol = ncol(cov.df1))
 
-    md <- base::mahalanobis(cov.df1, center = mu, cov = tau.mat)
+    md <- stats::mahalanobis(cov.df1, center = mu, cov = tau.mat)
     md.ex <- exp(beta-md/2)
 
     preds <- data.frame(cov.df[, c("x", "y")], md.ex) |> terra::rast()
