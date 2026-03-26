@@ -23,23 +23,21 @@ Each value indicates the precision (1/variance) of the niche centroid coordinate
 \item{tau.min}{Positive numeric, with as many elements as covariates in the ppmve model. Must be specified in the same order they appear in "covariate.names".
 Each value indicates the minimum value that precision is likely to have.}
 
+\item{tau.max}{Positive numeric, with as many elements as covariates in the ppmve model. Must be specified in the same order they appear in "covariate.names".
+Each value indicates the maximum value that precision is likely to have.}
+
 \item{beta.mean}{A single numeric positive or negative value, inticates the mean of the global intercept.}
 
 \item{beta.prec}{A single numeric positive, inticates the precision of the global intercept.}
-
-\item{tau.ax}{Positive numeric, with as many elements as covariates in the ppmve model. Must be specified in the same order they appear in "covariate.names".
-Each value indicates the maximum value that precision is likely to have.}
 }
 \description{
 Identify the correct structure to specify the priors for a euclidean distance model
 }
 \examples{
-\dontrun{
 priors <- euclidPriors(cent.mean = rep(0, 4),
                        cent.prec = rep(0.1, 4),
                        tau.min = rep(0.01, 4),
                        tau.max = rep(100, 4),
                        beta.mean = 0,
                        beta.prec = 1.0E-4)
-}
 }

@@ -18,10 +18,9 @@ probability values for each of the parameter posteriors, relevant
 to the type of analysis for which the method has been designed
 }
 \examples{
-\dontrun{
-r <- terra::rast("inst/extdata/ChelsaBio.tif") |> scale()
+r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 
-p <- read.csv("inst/extdata/points.csv")
+p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
 
 m <- ppmve(points = p,
            covariates = r,
@@ -29,10 +28,9 @@ m <- ppmve(points = p,
            Distance = "euclidean",
            no.bkgd = 5000,
            niter = 10000,
-           thin = 9,
+           nthin = 9,
            nburnin = 1000,
            chains = 1)
 
 summary.ppmve(m)
-}
 }

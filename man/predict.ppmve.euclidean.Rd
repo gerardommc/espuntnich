@@ -22,10 +22,9 @@ a fitted model, and the covariates in SpatRaster format with the same name as
 used to fit the model.
 }
 \examples{
-\dontrun{
-r <- terra::rast("inst/extdata/ChelsaBio.tif") |> scale()
+r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 
-p <- read.csv("inst/extdata/points.csv")
+p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
 
 m <- ppmve(points = p,
            covariates = r,
@@ -33,12 +32,11 @@ m <- ppmve(points = p,
            Distance = "euclidean",
            no.bkgd = 5000,
            niter = 10000,
-           thin = 9,
+           nthin = 9,
            nburnin = 1000,
            chains = 1) 
 
 predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
 
 plot(predictions)
-}
 }

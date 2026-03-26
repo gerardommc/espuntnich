@@ -8,10 +8,9 @@
 #' @param probs = The posterior probability quantiles to be returned by predict.ppmve
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of distance to the estimated centroids
 #' @examples
-#' \dontrun{
-#' r <- terra::rast("inst/extdata/ChelsaBio.tif") |> scale()
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 #' 
-#' p <- read.csv("inst/extdata/points.csv")
+#' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
 #' 
 #' m <- ppmve(points = p,
 #'            covariates = r,
@@ -27,13 +26,14 @@
 #' predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
 #' 
 #' plot(predictions)
-#' }
 #' @export
 #' @method predict.ppmve mahalanobis
 
 predict.ppmve.mahalanobis <- function(object,
                                       newdata = NULL,
                                       probs = c(0.0275, 0.5, 0.975)){
+  
+  `%do%` <- foreach::`%do%`
 
   if(is.null(newdata)){
     stop("Please provide a valid data.frame or SpatRaster object")

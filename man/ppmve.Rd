@@ -19,10 +19,10 @@ ppmve(
   niter = NULL,
   nburnin = NULL,
   nthin = NULL,
-  asCoda = T,
+  asCoda = TRUE,
   chains = 2,
-  WAIC = T,
-  parallel = F,
+  WAIC = TRUE,
+  parallel = FALSE,
   cores = NULL,
   seed = 123,
   weight.bias.conf = list(positive = TRUE, kernel = "gaussian", sigma = NULL, varcov =
@@ -89,10 +89,9 @@ Fit a minimum volume elipsoid as a covariate within an inhomogeneous Poisson Poi
 to develop an Ecological Niche Model using point locations and at least two raster covariates.
 }
 \examples{
-\dontrun{
-r <- terra::rast("inst/extdata/ChelsaBio.tif") |> scale()
+r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 
-p <- read.csv("inst/extdata/points.csv")
+p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
 
 m <- ppmve(points = p,
            covariates = r,
@@ -104,5 +103,4 @@ m <- ppmve(points = p,
            nthin = 9,
            nburnin = 1000,
            chains = 1)
-}
 }

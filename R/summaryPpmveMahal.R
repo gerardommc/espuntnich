@@ -6,10 +6,9 @@
 #' @param model = A model object of class ppmve
 #' @return A summary of the posterior samples for the fitted model
 #' @examples
-#' \dontrun{
-#' r <- terra::rast("inst/extdata/ChelsaBio.tif") |> scale()
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 #' 
-#' p <- read.csv("inst/extdata/points.csv")
+#' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
 #' 
 #' m <- ppmve(points = p,
 #'            covariates = r,
@@ -23,7 +22,6 @@
 #'            chains = 1)
 #' 
 #' summary.ppmve(m)
-#' }
 #' @export
 #' @method summary.ppmve mahalanobis
 

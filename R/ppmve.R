@@ -33,10 +33,9 @@
 #' @param weight.bias.conf = A list with default entries, positive = TRUE, kernel = "gaussian", sigma = NULL, varcov = NULL, weights = NULL, edge = TRUE, which are used to configure the replaceQAreas function and density.ppm, only relevant if bias.correction = "weights" and the class of bias.data is data.frame
 #' @return An object of class ppmve and the type of distance and covariance matrix used.
 #' @examples
-#' \dontrun{
-#' r <- terra::rast("inst/extdata/ChelsaBio.tif") |> scale()
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 #' 
-#' p <- read.csv("inst/extdata/points.csv")
+#' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
 #' 
 #' m <- ppmve(points = p,
 #'            covariates = r,
@@ -48,7 +47,6 @@
 #'            nthin = 9,
 #'            nburnin = 1000,
 #'            chains = 1)
-#' }
 #' @export
 
 ppmve <-  function(points = NULL,
@@ -65,10 +63,10 @@ ppmve <-  function(points = NULL,
                         niter = NULL,
                         nburnin = NULL,
                         nthin = NULL,
-                        asCoda = T,
+                        asCoda = TRUE,
                         chains = 2,
-                        WAIC = T,
-                        parallel = F,
+                        WAIC = TRUE,
+                        parallel = FALSE,
                         cores = NULL,
                         seed = 123,
                         weight.bias.conf = list(positive = TRUE,
@@ -78,6 +76,7 @@ ppmve <-  function(points = NULL,
                                                 weights = NULL,
                                                 edge = TRUE)){
   
+  `%dopar%` <- foreach::`%dopar%`
   
   if(is.null(points) | is.null(covariates) | is.null(covariate.names) & is.null(samples.data$presence.data) & is.null(samples.data$background.data)){
     stop("Please specify valid inputs for points, covariates, covariate.names or samples.data")
@@ -99,7 +98,7 @@ ppmve <-  function(points = NULL,
       covariates <- covariates[[covariate.names]]
       
       cov.df <- as.data.frame(covariates, xy = T)
-      p.ext <- terra::extract(covariates, points, ID = F, na.rm = T) |> stats::na.omit() |> as.data.frame()
+      p.ext <- terra::extract(covariates, points, ID = FALSE, na.rm = T) |> stats::na.omit() |> as.data.frame()
       
       iml <- espatsmo::imFromStack(covariates)
       win <- spatstat.geom::as.owin(iml[[1]])
@@ -129,7 +128,7 @@ ppmve <-  function(points = NULL,
           background.points <- as.data.frame(background.points)
         }
 
-        clim.back <- terra::extract(covariates, background.points, ID = F, na.rm = T) |> stats::na.omit() |> as.data.frame()
+        clim.back <- terra::extract(covariates, background.points, ID = FALSE, na.rm = T) |> stats::na.omit() |> as.data.frame()
         wei <- max(Q$w)
       }
     }

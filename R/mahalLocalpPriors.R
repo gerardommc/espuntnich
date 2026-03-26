@@ -14,7 +14,6 @@
 #' @param beta.mean A single numeric positive or negative value, inticates the mean of the global intercept.
 #' @param beta.prec A single numeric positive, inticates the precision of the global intercept.
 #' @examples
-#' \dontrun{
 #' priors <- mahalLocalPriors(cent.mean = rep(0, 4),
 #'                             cent.prec = rep(0.1, 4),
 #'                             mu.b.mean = rep(0, 4),
@@ -22,7 +21,6 @@
 #'                             R = diag(4),
 #'                             beta.mean = 0,
 #'                             beta.prec = 1.0E-4)
-#' }
 #' @export
 
 mahalLocalPriors <- function(cent.mean = NULL,
