@@ -33,5 +33,5 @@ m <- ppmve(points = p,
            nburnin = 1000,
            chains = 1)
 
-summary.ppmve(m)
+summary(m)
 }
