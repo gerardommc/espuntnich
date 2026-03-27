@@ -21,20 +21,13 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
-      terra,
-      spatstat,
-      nimble,
-      coda,
       espatsmo,
-      foreach,
       doParallel
 Depends:
       terra,
       spatstat,
       nimble,
       coda,
-      espatsmo,
-      foreach,
-      doParallel
+      foreach
 RoxygenNote: 7.3.3
 
