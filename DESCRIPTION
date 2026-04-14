@@ -1,33 +1,24 @@
-Package: espuntnich
 Type: Package
+Package: espuntnich
 Title: Fit Point Process Models for Ecological Niche Modelling
 Version: 0.1.0
 Authors@R: c(
-    person(
-      "Gerardo", "Martín",
-      email = "gerardo.mmc@enesmerida.unam.mx",
-      role = c("aut", "cre")
-    ),
-    person(
-      "Eduardo", "Pacheco",
-      email = "epacheco@ciencias.unam.mx",
-      role = c("ctb")
-    )
+    person("Gerardo", "Martín", , "gerardo.mmc@enesmerida.unam.mx", role = c("aut", "cre")),
+    person("Eduardo", "Pacheco", , "epacheco@ciencias.unam.mx", role = "ctb")
   )
-Description: Fit an ellipsoid within a point process model for ecological niche modelling
-    	using Nimble as the MonteCarlo simulation platform, while also accounting for observation bias.
 Maintainer: Gerardo Martín <gerardo.mmc@enesmerida.unam.mx>
+Description: Fit an ellipsoid within a point process model for ecological
+    niche modelling using Nimble as the MonteCarlo simulation platform,
+    while also accounting for observation bias.
 License: GPL-3
+Imports:
+    coda,
+    doParallel,
+    espatsmo,
+    foreach,
+    nimble,
+    spatstat,
+    terra
 Encoding: UTF-8
 LazyData: true
-Imports:
-      espatsmo,
-      doParallel
-Depends:
-      terra,
-      spatstat,
-      nimble,
-      coda,
-      foreach
 RoxygenNote: 7.3.3
-
