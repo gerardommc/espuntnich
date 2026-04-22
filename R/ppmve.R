@@ -364,7 +364,7 @@ ppmve <-  function(points = NULL,
       }
 
       if(!is.null(priors)){
-        constants <- list(n.clim = ncol(clim.back),,
+        constants <- list(n.clim = ncol(clim.back),
               R = priors$R,
               n.data = nrow(points) + nrow(clim.back),
               cent.mean = priors$cent.mean,
