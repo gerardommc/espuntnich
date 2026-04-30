@@ -30,6 +30,7 @@
 #' @param parallel Logical, whether to run chains in parallel, F.
 #' @param cores Numeric value indicating the number of cores to be used for running the chains. Should be equal to "chains".
 #' @param seed Numeric, idincating the random seed generator number, 123.
+#' @param remove.outer.points Logical, used to indicate iff points ling outside the study window are going to be removed from model run.
 #' @param weight.bias.conf = A list with default entries, positive = TRUE, kernel = "gaussian", sigma = NULL, varcov = NULL, weights = NULL, edge = TRUE, which are used to configure the replaceQAreas function and density.ppm, only relevant if bias.correction = "weights" and the class of bias.data is data.frame
 #' @return An object of class ppmve and the type of distance and covariance matrix used.
 #' @examples
@@ -71,6 +72,7 @@ ppmve <-  function(points = NULL,
                         parallel = F,
                         cores = NULL,
                         seed = 123,
+                        remove.outer.points = TRUE,
                         weight.bias.conf = list(positive = TRUE,
                                                 kernel = "gaussian",
                                                 sigma = NULL,
@@ -83,7 +85,25 @@ ppmve <-  function(points = NULL,
   if(is.null(points) | is.null(covariates) | is.null(covariate.names) & is.null(samples.data$presence.data) & is.null(samples.data$background.data)){
     stop("Please specify valid inputs for points, covariates, covariate.names or samples.data")
   }
-  
+
+  if(!is.null(points) & !is.null(covariates)){
+    vals <- terra::extract(x = covariates, y = points, ID = FALSE)
+    vals <- subset(vals, select = covariate.names)
+    
+    nas <- apply(vals, 2, is.na) |> apply(2, which) |> c() |> unique()
+    
+    if(length(nas) != 0){
+      if(remove.outer.points){
+        points <- points[-nas, ]
+      }
+
+      if(!remove.outer.points){
+        stop(paste("Point number ", nas, " lies outside the study area, please verify and re-run ppmve", sep = ""))
+      }
+    }
+  }
+
+
   if(!is.null(bias.correction) & !is.null(samples.data)){
     stop("Samples with data is incompatible with bias correction methods, please set either to NULL")
   }

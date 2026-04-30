@@ -19,14 +19,15 @@ ppmve(
   niter = NULL,
   nburnin = NULL,
   nthin = NULL,
-  asCoda = TRUE,
+  asCoda = T,
   chains = 2,
-  WAIC = TRUE,
-  parallel = FALSE,
+  WAIC = T,
+  parallel = F,
   cores = NULL,
   seed = 123,
+  remove.outer.points = TRUE,
   weight.bias.conf = list(positive = TRUE, kernel = "gaussian", sigma = NULL, varcov =
-    NULL, weights = NULL, edge = TRUE)
+    NULL, weights = NULL, edge = TRUE, zo.norm = FALSE)
 )
 }
 \arguments{
@@ -79,6 +80,8 @@ positive real-valued vector of length equal to the length of "covariate.names", 
 
 \item{seed}{Numeric, idincating the random seed generator number, 123.}
 
+\item{remove.outer.points}{Logical, used to indicate iff points ling outside the study window are going to be removed from model run.}
+
 \item{weight.bias.conf}{= A list with default entries, positive = TRUE, kernel = "gaussian", sigma = NULL, varcov = NULL, weights = NULL, edge = TRUE, which are used to configure the replaceQAreas function and density.ppm, only relevant if bias.correction = "weights" and the class of bias.data is data.frame}
 }
 \value{
@@ -89,9 +92,10 @@ Fit a minimum volume elipsoid as a covariate within an inhomogeneous Poisson Poi
 to develop an Ecological Niche Model using point locations and at least two raster covariates.
 }
 \examples{
-r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+\dontrun{
+r <- terra::rast("inst/extdata/ChelsaBio.tif") |> scale()
 
-p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+p <- read.csv("inst/extdata/points.csv")
 
 m <- ppmve(points = p,
            covariates = r,
@@ -103,4 +107,5 @@ m <- ppmve(points = p,
            nthin = 9,
            nburnin = 1000,
            chains = 1)
+}
 }
