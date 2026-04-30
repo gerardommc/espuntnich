@@ -52,34 +52,34 @@
 #' }
 #' @export
 
-ppmve <-  function(points = NULL,
-                        covariates = NULL,
-                        covariate.names = NULL,
-                        no.bkgd = 5000,
-                        bias.data = NULL,
-                        bias.correction = NULL, #options = "background", "weights"
-                        background.points = NULL,
-                        samples.data = NULL,
-                        priors = NULL,
-                        CovMat = "local",
-                        Distance = "mahalanobis", #options = "euclidean"
-                        niter = NULL,
-                        nburnin = NULL,
-                        nthin = NULL,
-                        asCoda = T,
-                        chains = 2,
-                        WAIC = T,
-                        parallel = F,
-                        cores = NULL,
-                        seed = 123,
-                        remove.outer.points = TRUE,
-                        weight.bias.conf = list(positive = TRUE,
-                                                kernel = "gaussian",
-                                                sigma = NULL,
-                                                varcov = NULL,
-                                                weights = NULL,
-                                                edge = TRUE,
-                                                zo.norm = FALSE)){
+ppmve <- function(points = NULL,
+                  covariates = NULL,
+                  covariate.names = NULL,
+                  no.bkgd = 5000,
+                  bias.data = NULL,
+                  bias.correction = NULL, #options = "background", "weights"
+                  background.points = NULL,
+                  samples.data = NULL,
+                  priors = NULL,
+                  CovMat = "local",
+                  Distance = "mahalanobis", #options = "euclidean"
+                  niter = NULL,
+                  nburnin = NULL,
+                  nthin = NULL,
+                  asCoda = T,
+                  chains = 2,
+                  WAIC = T,
+                  parallel = F,
+                  cores = NULL,
+                  seed = 123,
+                  remove.outer.points = TRUE,
+                  weight.bias.conf = list(positive = TRUE,
+                                          kernel = "gaussian",
+                                          sigma = NULL,
+                                          varcov = NULL,
+                                          weights = NULL,
+                                          edge = TRUE,
+                                          zo.norm = FALSE)){
   
   
   if(is.null(points) | is.null(covariates) | is.null(covariate.names) & is.null(samples.data$presence.data) & is.null(samples.data$background.data)){
@@ -95,6 +95,7 @@ ppmve <-  function(points = NULL,
     if(length(nas) != 0){
       if(remove.outer.points){
         points <- points[-nas, ]
+        warning(paste("Point number ", nas, " lies outside the study area and was removed from data", sep = ""))
       }
 
       if(!remove.outer.points){
