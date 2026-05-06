@@ -86,6 +86,11 @@ ppmve <- function(points = NULL,
     stop("Please specify valid inputs for points, covariates, covariate.names or samples.data")
   }
 
+  if(parallel & chains == 1){
+    warning("Setting parallel as FALSE because the number of chains is 1")
+    parallel <- FALSE
+  }
+
   if(!is.null(points) & !is.null(covariates)){
     vals <- terra::extract(x = covariates, y = points, ID = FALSE)
     vals <- subset(vals, select = covariate.names)
