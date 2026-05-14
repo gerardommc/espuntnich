@@ -81,6 +81,8 @@ ppmve <- function(points = NULL,
                                           edge = TRUE,
                                           zo.norm = FALSE)){
   
+  `%dopar%` <- foreach::`%dopar%`
+
   
   if(is.null(points) | is.null(covariates) | is.null(covariate.names) & is.null(samples.data$presence.data) & is.null(samples.data$background.data)){
     stop("Please specify valid inputs for points, covariates, covariate.names or samples.data")
