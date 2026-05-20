@@ -4,10 +4,14 @@
 \alias{predict.ppmve}
 \title{Predict method for ppmve models.}
 \usage{
-\method{predict}{ppmve}(object, ...)
+\method{predict}{ppmve}(object, newdata, probs)
 }
 \arguments{
 \item{object}{A model object of class ppmve}
+
+\item{newdata}{A SpatRaster used for projecting the ppmve model}
+
+\item{probs}{A numeric value indicating the percntiles to be shown in the predictions}
 }
 \description{
 Project a ppmve model onto geographic space.
