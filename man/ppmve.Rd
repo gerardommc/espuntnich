@@ -93,9 +93,6 @@ to develop an Ecological Niche Model using point locations and at least two rast
 }
 \examples{
 
-library(terra)
-library(spatstat)
-
 r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 
 p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()

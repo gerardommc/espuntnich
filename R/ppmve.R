@@ -35,9 +35,6 @@
 #' @return An object of class ppmve and the type of distance and covariance matrix used.
 #' @examples
 #' 
-#' library(terra)
-#' library(spatstat)
-#' 
 #' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 #' 
 #' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
