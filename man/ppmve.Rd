@@ -58,7 +58,7 @@ matching the number of covariate.names, and parameter "beta" is a single, real-v
 For the euclidean model, the estimated parameters are "centroid.pres", "tau.pres" and "beta". "centrod.pres" is a real-valued vector equal to those used in teh mahalanobis models; "tau.pres" is a 
 positive real-valued vector of length equal to the length of "covariate.names", and "beta" is the same as in the mahalanobis models.}
 
-\item{CovMat}{A character string with values "local" or "global", to configure whether the covariance matrix is parameterised from the point process only or separately from values at sampling localities. This argument is only relevant for "mahalanobis" distance.}
+\item{CovMat}{A character string with values "local", "locallocal" or "global", to configure whether the covariance matrix is parameterised from the point process only or separately from values at sampling localities. This argument is only relevant for "mahalanobis" distance.}
 
 \item{Distance}{A character string with values"mahalanobis" or "euclidean", indicating the type of distance to be calculated.}
 

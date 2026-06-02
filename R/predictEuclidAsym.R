@@ -1,0 +1,121 @@
+#' @title Generate predictions from an asymmetric ppmve euclidean model.
+#' @description
+#' Project an asymmetric ppmve model onto geographic space using Euclidean distance constraints. 
+#' To do this, the user should provide a fitted asymmetric model, and the covariates in 
+#' SpatRaster format with the same name as used to fit the model.
+#' @param object A model object of class ppmveAsym with euclidean distance
+#' @param newdata A SpatRaster object with covariate names contained in the covariate.names argument of ppmveAsym function
+#' @param probs The posterior probability quantiles to be returned by predict.ppmveAsym
+#' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of asymmetric Euclidean distance to the estimated centroids
+#' @examples
+#' \dontrun{
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+#' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+#' 
+#' m <- ppmveAsym(points = p,
+#'                covariates = r,
+#'                covariate.names = names(r),
+#'                Distance = "euclidean",
+#'                no.bkgd = 5000,
+#'                niter = 10000,
+#'                nthin = 9,
+#'                nburnin = 1000,
+#'                chains = 1) 
+#' 
+#' predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
+#' plot(predictions)
+#' }
+#' @export
+#' @method predict.ppmveAsym euclidean
+
+predict.ppmveAsym.euclidean <- function(object, 
+                                        newdata = NULL, 
+                                        probs = c(0.0275, 0.5, 0.975)){
+  
+  `%do%` <- foreach::`%do%`
+
+  if(is.null(newdata)){
+    stop("Please provide a valid data.frame or SpatRaster object")
+  }
+
+  if(!inherits(newdata, "SpatRaster")){
+    stop("Please provide a SpatRaster object")
+  }
+
+  if(inherits(newdata, "SpatRaster")){
+    cov.df <- newdata |> as.data.frame(xy = TRUE)
+    cov.df1 <- cov.df |> subset(select = c(object$call$covariates)) |> as.matrix()
+  }
+
+  if(object$call$chains == 1){
+    mcl <- object$model$samples |> coda::as.mcmc()
+  }
+
+  if(object$call$chains > 1){
+    mcl <- object$model$samples |> coda::as.mcmc.list()
+    mc <- mcl[[1]]
+    for(i in 2:object$call$chains){
+      mc <- rbind(mc, mcl[[i]])
+    }
+    mcl <- mc |> coda::as.mcmc()
+  }
+
+  if(length(probs) > 1){
+    coefs <- lapply(probs, function(x){coda::HPDinterval(mcl, prob = x)})
+  }
+
+  if(length(probs) == 1){
+    coefs <- coda::HPDinterval(mcl, prob = probs)
+  }
+
+  if(length(probs) > 1){
+
+      p <- foreach::foreach(i = seq_along(probs), .combine = cbind) %do% {
+
+        mu <- coefs[[i]][paste0("centroid.pres[", 1:ncol(cov.df1), "]"), ] |> rowMeans()
+        beta <- coefs[[i]]["beta", ] |> mean()
+        
+        # 1. Diagonal precision matrix for Euclidean distance
+        tau.mat <- coefs[[i]][paste0("tau.pres[", 1:ncol(cov.df1), "]"), ] |> rowMeans() |> diag()
+        md <- stats::mahalanobis(cov.df1, center = mu, cov = tau.mat)
+        
+        # 2. Skewness component evaluation: alpha^T * (X - mu)
+        alpha <- coefs[[i]][paste0("alpha[", 1:ncol(cov.df1), "]"), ] |> rowMeans()
+        X_cent <- sweep(cov.df1, 2, mu, "-")
+        skew.val <- X_cent %*% alpha
+        
+        # 3. Combine using the Skew-Normal probability multiplier
+        md.ex <- exp(beta - md/2) * 2 * stats::pnorm(skew.val)
+
+        return(md.ex)
+      }
+
+      preds <- data.frame(cov.df[, c("x", "y")], p) |> terra::rast()
+      names(preds) <- paste0("Prob.", probs)
+      terra::crs(preds) <- terra::crs(newdata)
+  }
+
+  if(length(probs) == 1){
+
+      mu <- coefs[paste0("centroid.pres[", 1:ncol(cov.df1), "]"), ] |> rowMeans()
+      beta <- coefs["beta", ] |> mean()
+      
+      # 1. Diagonal precision matrix for Euclidean distance
+      tau.mat <- coefs[paste0("tau.pres[", 1:ncol(cov.df1), "]"), ] |> rowMeans() |> diag()
+      md <- stats::mahalanobis(cov.df1, center = mu, cov = tau.mat)
+      
+      # 2. Skewness component evaluation: alpha^T * (X - mu)
+      alpha <- coefs[paste0("alpha[", 1:ncol(cov.df1), "]"), ] |> rowMeans()
+      X_cent <- sweep(cov.df1, 2, mu, "-")
+      skew.val <- X_cent %*% alpha
+      
+      # 3. Combine using the Skew-Normal probability multiplier
+      md.ex <- exp(beta - md/2) * 2 * stats::pnorm(skew.val)
+
+      preds <- data.frame(cov.df[, c("x", "y")], md.ex) |> terra::rast()
+      names(preds) <- paste0("Prob.", probs)
+      terra::crs(preds) <- terra::crs(newdata)
+  }
+
+  return(preds)
+}

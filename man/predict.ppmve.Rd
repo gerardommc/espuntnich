@@ -11,7 +11,7 @@
 
 \item{newdata}{A SpatRaster used for projecting the ppmve model}
 
-\item{probs}{A numeric value indicating the percntiles to be shown in the predictions}
+\item{probs}{A numeric value indicating the percentiles to be shown in the predictions}
 }
 \description{
 Project a ppmve model onto geographic space.

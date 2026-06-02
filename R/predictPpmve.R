@@ -3,7 +3,7 @@
 #' Project a ppmve model onto geographic space.
 #' @param object A model object of class ppmve
 #' @param newdata A SpatRaster used for projecting the ppmve model
-#' @param probs A numeric value indicating the percntiles to be shown in the predictions
+#' @param probs A numeric value indicating the percentiles to be shown in the predictions
 #' @export
 #' @method predict ppmve
 
