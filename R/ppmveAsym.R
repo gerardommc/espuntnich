@@ -24,6 +24,24 @@
 #' @param remove.outer.points Logical, used to indicate if points lying outside the study window are going to be removed.
 #' @param weight.bias.conf A list with configurations for the replaceQAreas function and density.ppm.
 #' @return An object of class ppmveAsym and the type of distance used.
+#' @examples
+#' \dontrun{
+#' 
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+#' 
+#' p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
+#' 
+#' m <- ppmveAsym(points = p,
+#'            covariates = r,
+#'            covariate.names = names(r),
+#'            CovMat = "local",
+#'            Distance = "mahalanobis",
+#'            no.bkgd = 5000,
+#'            niter = 10000,
+#'            nthin = 9,
+#'            nburnin = 1000,
+#'            chains = 1)
+#' }
 #' @export
 
 ppmveAsym <- function(points = NULL,

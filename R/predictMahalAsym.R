@@ -7,6 +7,28 @@
 #' @param newdata A SpatRaster object with covariate names contained in the covariate.names argument of ppmveAsym function
 #' @param probs The posterior probability quantiles to be returned by predict.ppmveAsym
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of asymmetric distance to the estimated centroids
+#' @examples
+#' \dontrun{
+#' 
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+#' 
+#' p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
+#' 
+#' m <- ppmveAsym(points = p,
+#'            covariates = r,
+#'            covariate.names = names(r),
+#'            CovMat = "local",
+#'            Distance = "mahalanobis",
+#'            no.bkgd = 5000,
+#'            niter = 10000,
+#'            nthin = 9,
+#'            nburnin = 1000,
+#'            chains = 1)
+#' 
+#' predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
+#' 
+#' plot(predictions)
+#' }
 #' @export
 #' @method predict.ppmveAsym mahalanobis
 

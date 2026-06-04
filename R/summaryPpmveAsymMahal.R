@@ -8,7 +8,7 @@
 #' @examples
 #' \dontrun{
 #' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
-#' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+#' p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
 #' 
 #' m <- ppmveAsym(points = p,
 #'                covariates = r,
