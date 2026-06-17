@@ -22,9 +22,9 @@ To do this, the user should provide a fitted asymmetric model, and the covariate
 SpatRaster format with the same name as used to fit the model.
 }
 \examples{
-\dontrun{
+
 r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
-p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
 
 m <- ppmveAsym(points = p,
                covariates = r,
@@ -38,5 +38,5 @@ m <- ppmveAsym(points = p,
 
 predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
 plot(predictions)
-}
+
 }

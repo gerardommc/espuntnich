@@ -6,7 +6,7 @@
 #' @param model A model object of class ppmveAsym
 #' @return A summary of the posterior samples for the fitted asymmetric model
 #' @examples
-#' \dontrun{
+#' 
 #' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 #' p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
 #' 
@@ -22,7 +22,7 @@
 #'                chains = 1)
 #' 
 #' summary(m)
-#' }
+#' 
 #' @export
 #' @method summary.ppmveAsym mahalanobis
 

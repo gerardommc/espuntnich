@@ -10,7 +10,7 @@
 #' @param background.points A two-column data.frame with the x and y coordinates of background points.
 #' @param samples.data A list containing three data slots: presence.data, background.data, and area.weights.
 #' @param priors Informative priors list structured matching asymmetric model constraints.
-#' @param CovMat A character string with values "local" or "global". Relevant only for "mahalanobis" distance.
+#' @param CovMat A character string with values "local" or "locallocal". Relevant only for "mahalanobis" distance.
 #' @param Distance A character string with values "mahalanobis" or "euclidean".
 #' @param niter A numeric value indicating the number of MCMC iterations.
 #' @param nburnin A numeric value indicating the number of MCMC iterations to be discarded.
@@ -25,7 +25,6 @@
 #' @param weight.bias.conf A list with configurations for the replaceQAreas function and density.ppm.
 #' @return An object of class ppmveAsym and the type of distance used.
 #' @examples
-#' \dontrun{
 #' 
 #' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 #' 
@@ -41,7 +40,7 @@
 #'            nthin = 9,
 #'            nburnin = 1000,
 #'            chains = 1)
-#' }
+#'
 #' @export
 
 ppmveAsym <- function(points = NULL,
@@ -238,36 +237,6 @@ ppmveAsym <- function(points = NULL,
     
     # Asymmetric Mahalanobis monitors track skewness parameters (alpha)
     parms <- c("centroid.pres", "mu.back", "tau.pres", "alpha", "beta")
-    
-    if(CovMat == "global"){
-      if(is.null(priors)){
-        constants <- list(n.clim = ncol(clim.back),
-                          R = diag(ncol(clim.back)),
-                          n.data = nrow(points) + nrow(clim.back),
-                          n.back = nrow(clim.back),
-                          cent.mean = rep(0, ncol(clim.back)),
-                          cent.prec = rep(0.1, ncol(clim.back)),
-                          mu.b.mean = rep(0, ncol(clim.back)),
-                          mu.b.prec = rep(1.0E-4, ncol(clim.back)),
-                          alpha.mean = rep(0, ncol(clim.back)),
-                          alpha.prec = rep(0.1, ncol(clim.back)),
-                          beta.mean = 0,
-                          beta.prec = 1.0E-4)
-      } else {
-        constants <- list(n.clim = ncol(clim.back),
-                          R = priors$R,
-                          n.data = nrow(points) + nrow(clim.back),
-                          n.back = nrow(clim.back),
-                          cent.mean = priors$cent.mean,
-                          cent.prec = priors$cent.prec,
-                          mu.b.mean = priors$mu.b.mean,
-                          mu.b.prec = priors$mu.b.prec,
-                          alpha.mean = priors$alpha.mean,
-                          alpha.prec = priors$alpha.prec,
-                          beta.mean = priors$beta.mean,
-                          beta.prec = priors$beta.prec)            
-      }
-    }
     
     if(CovMat == "local"){
       if(is.null(priors)){

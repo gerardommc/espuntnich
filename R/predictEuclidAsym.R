@@ -8,9 +8,9 @@
 #' @param probs The posterior probability quantiles to be returned by predict.ppmveAsym
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of asymmetric Euclidean distance to the estimated centroids
 #' @examples
-#' \dontrun{
+#' 
 #' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
-#' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+#' p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
 #' 
 #' m <- ppmveAsym(points = p,
 #'                covariates = r,
@@ -24,7 +24,7 @@
 #' 
 #' predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
 #' plot(predictions)
-#' }
+#' 
 #' @export
 #' @method predict.ppmveAsym euclidean
 

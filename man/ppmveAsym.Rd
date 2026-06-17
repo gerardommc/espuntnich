@@ -49,7 +49,7 @@ ppmveAsym(
 
 \item{priors}{Informative priors list structured matching asymmetric model constraints.}
 
-\item{CovMat}{A character string with values "local" or "global". Relevant only for "mahalanobis" distance.}
+\item{CovMat}{A character string with values "local" or "locallocal". Relevant only for "mahalanobis" distance.}
 
 \item{Distance}{A character string with values "mahalanobis" or "euclidean".}
 
@@ -81,4 +81,22 @@ An object of class ppmveAsym and the type of distance used.
 \description{
 Fit a minimum volume ellipsoid or distance constraint with asymmetric skewness parameters as a 
 covariate within an inhomogeneous Poisson Point Process Model to develop an Ecological Niche Model.
+}
+\examples{
+
+r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+
+p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
+
+m <- ppmveAsym(points = p,
+           covariates = r,
+           covariate.names = names(r),
+           CovMat = "local",
+           Distance = "mahalanobis",
+           no.bkgd = 5000,
+           niter = 10000,
+           nthin = 9,
+           nburnin = 1000,
+           chains = 1)
+
 }

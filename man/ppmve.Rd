@@ -52,13 +52,11 @@ background.data = NULL, area.weights = NULL)}
 
 \item{priors}{By default it is NULL, and flat priors are assumed for all centroid coordinates or precision components. If more informative priors are desired, a list with data slots
 named after each parameter estimated by the supported models must be provided. The variations for mahalanobis distance models are (with parameters which must be contained in the list 
-between brackets): (1) local (centroid.pres, mu.back, tau.pres, beta); (2) locallocal (centroid.pres, tau.pres, beta); (3) global (centroid.pres, mu.back, tau.pres, beta). "centroid.pres",
-and "mu.back" must be a vector of length equal to the number of covariate.names, whereas "tau.pres" must be an inverse covariance square matrix, with the same number of rows and colums, 
-matching the number of covariate.names, and parameter "beta" is a single, real-valued number which is the model intercept. 
+between brackets): (1) local (centroid.pres, mu.back, tau.pres, beta); (2) locallocal (centroid.pres, tau.pres, beta); 
 For the euclidean model, the estimated parameters are "centroid.pres", "tau.pres" and "beta". "centrod.pres" is a real-valued vector equal to those used in teh mahalanobis models; "tau.pres" is a 
 positive real-valued vector of length equal to the length of "covariate.names", and "beta" is the same as in the mahalanobis models.}
 
-\item{CovMat}{A character string with values "local", "locallocal" or "global", to configure whether the covariance matrix is parameterised from the point process only or separately from values at sampling localities. This argument is only relevant for "mahalanobis" distance.}
+\item{CovMat}{A character string with values "local", "locallocal", to configure whether the covariance matrix is parameterised from the precence localities or point process only. This argument is only relevant for "mahalanobis" distance.}
 
 \item{Distance}{A character string with values"mahalanobis" or "euclidean", indicating the type of distance to be calculated.}
 

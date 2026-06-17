@@ -8,7 +8,6 @@
 #' @param probs The posterior probability quantiles to be returned by predict.ppmveAsym
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of asymmetric distance to the estimated centroids
 #' @examples
-#' \dontrun{
 #' 
 #' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
 #' 
@@ -28,7 +27,7 @@
 #' predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
 #' 
 #' plot(predictions)
-#' }
+#' 
 #' @export
 #' @method predict.ppmveAsym mahalanobis
 

@@ -21,3 +21,25 @@ Project an asymmetric ppmve model onto geographic space. To do this, the user sh
 a fitted asymmetric model, and the covariates in SpatRaster format with the same name as
 used to fit the model.
 }
+\examples{
+
+r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+
+p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
+
+m <- ppmveAsym(points = p,
+           covariates = r,
+           covariate.names = names(r),
+           CovMat = "local",
+           Distance = "mahalanobis",
+           no.bkgd = 5000,
+           niter = 10000,
+           nthin = 9,
+           nburnin = 1000,
+           chains = 1)
+
+predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
+
+plot(predictions)
+
+}

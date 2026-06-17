@@ -14,12 +14,10 @@
 #' background.data = NULL, area.weights = NULL)
 #' @param priors By default it is NULL, and flat priors are assumed for all centroid coordinates or precision components. If more informative priors are desired, a list with data slots
 #' named after each parameter estimated by the supported models must be provided. The variations for mahalanobis distance models are (with parameters which must be contained in the list 
-#' between brackets): (1) local (centroid.pres, mu.back, tau.pres, beta); (2) locallocal (centroid.pres, tau.pres, beta); (3) global (centroid.pres, mu.back, tau.pres, beta). "centroid.pres",
-#' and "mu.back" must be a vector of length equal to the number of covariate.names, whereas "tau.pres" must be an inverse covariance square matrix, with the same number of rows and colums, 
-#' matching the number of covariate.names, and parameter "beta" is a single, real-valued number which is the model intercept. 
+#' between brackets): (1) local (centroid.pres, mu.back, tau.pres, beta); (2) locallocal (centroid.pres, tau.pres, beta); 
 #' For the euclidean model, the estimated parameters are "centroid.pres", "tau.pres" and "beta". "centrod.pres" is a real-valued vector equal to those used in teh mahalanobis models; "tau.pres" is a 
 #' positive real-valued vector of length equal to the length of "covariate.names", and "beta" is the same as in the mahalanobis models.
-#' @param CovMat A character string with values "local", "locallocal" or "global", to configure whether the covariance matrix is parameterised from the point process only or separately from values at sampling localities. This argument is only relevant for "mahalanobis" distance.
+#' @param CovMat A character string with values "local", "locallocal", to configure whether the covariance matrix is parameterised from the precence localities or point process only. This argument is only relevant for "mahalanobis" distance.
 #' @param Distance A character string with values"mahalanobis" or "euclidean", indicating the type of distance to be calculated.
 #' @param niter A numeric value indicating the number of MCMC iterations.
 #' @param nburnin A numeric value indicating the number of MCMC iterations to be discarded at the beginning of each chain.
@@ -270,56 +268,6 @@ ppmve <- function(points = NULL,
   
   if(Distance == "mahalanobis"){
 
-    if(CovMat == "global"){
-      
-      parms <- c("centroid.pres",
-                "mu.back",
-                "tau.pres",
-                "beta")
-      
-      if(is.null(priors)){
-        constants <- list(n.clim = ncol(clim.back),
-                          R = diag(ncol(clim.back)),
-                          n.data = nrow(points) + nrow(clim.back),
-                          n.back = nrow(clim.back),
-                          cent.mean = rep(0, ncol(clim.back)),
-                          cent.prec = rep(0.1, ncol(clim.back)),
-                          mu.b.mean = rep(0, ncol(clim.back)),
-                          mu.b.prec = rep(1.0E-4, ncol(clim.back)),
-                          beta.mean = 0,
-                          beta.prec = 1.0E-4)
-      }
-        
-      if(!is.null(priors)){
-          constants <- list(n.clim = ncol(clim.back),
-                            R = priors$R,
-                            n.data = nrow(points) + nrow(clim.back),
-                            n.back = nrow(clim.back),
-                            cent.mean = priors$cent.mean,
-                            cent.prec = priors$cent.prec,
-                            mu.b.mean = priors$mu.b.mean,
-                            mu.b.prec = priors$mu.b.prec,
-                            beta.mean = priors$beta.mean,
-                            beta.prec = priors$beta.prec)            
-      }
-
-      if(length(wei) == 1){
-          constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
-      }
-      
-      if(length(wei) > 1){
-          constants$w <- c(rep(1/(stats::median(wei)), nrow(points)), wei)
-      }
-              
-      inits <- list(centroid.pres = constants$cent.mean,
-                    mu.back = constants$mu.b.mean,
-                    tau.pres = constants$R,
-                    beta = constants$beta.mean)
-      
-        data <- list(lambda = c(rep(1L, nrow(points)), rep(0L, nrow(clim.back))),
-                      clim = rbind(p.ext, clim.back))
-    }
-    
     if(CovMat == "local"){
 
       parms <- c("centroid.pres",
@@ -460,9 +408,6 @@ ppmve <- function(points = NULL,
   
   #Loading the specified Nimble model
   if(Distance == "mahalanobis"){
-    if(CovMat == "global"){
-      modelCode <- GlobalMahal
-    }
     
     if(CovMat == "local"){
       modelCode <- LocalMahal

@@ -32,3 +32,12 @@ mahalLocallocalPriorsAsym(
 \description{
 Identify the correct structure to specify the priors for an asymmetric ellipsoid model
 }
+\examples{
+priors <- mahalLocallocalPriorsAsym(cent.mean = rep(0, 4),
+                                cent.prec = rep(1.0E-4, 4),
+                                R = diag(4),
+                                alpha.mean = rep(0, 4),
+                                alpha.prec = rep(0.1, 4),
+                                beta.mean = 0,
+                                beta.prec = 1.0E-4)
+}

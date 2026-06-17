@@ -18,9 +18,9 @@ probability values for each of the parameter posteriors, relevant
 to the type of analysis for which the method has been designed.
 }
 \examples{
-\dontrun{
+
 r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
-p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
 
 m <- ppmveAsym(points = p,
                covariates = r,
@@ -34,5 +34,5 @@ m <- ppmveAsym(points = p,
                chains = 1)
 
 summary(m)
-}
+
 }
