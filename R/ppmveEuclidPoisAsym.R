@@ -8,7 +8,7 @@ EuclidAsym <- nimble::nimbleCode({
   }
   
   # Prior for Global Intercept
-  beta ~ dnorm(beta.mean, beta.tau)
+  beta ~ dnorm(beta.mean, beta.prec)
   
   # Asymmetric Centroid Likelihood
   for(i in 1:n.data){

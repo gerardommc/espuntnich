@@ -149,7 +149,7 @@ ppmveAsym <- function(points = NULL,
                                           positive = weight.bias.conf$positive,
                                           kernel = weight.bias.conf$kernel,
                                           sigma = weight.bias.conf$sigma,
-                                          varcov = weight.bias.conf$sigma,
+                                          varcov = weight.bias.conf$varcov,
                                           weights = weight.bias.conf$weights,
                                           edge = weight.bias.conf$edge,
                                           zo.norm = weight.bias.conf$zo.norm)
@@ -177,7 +177,7 @@ ppmveAsym <- function(points = NULL,
                                           positive = weight.bias.conf$positive,
                                           kernel = weight.bias.conf$kernel,
                                           sigma = weight.bias.conf$sigma,
-                                          varcov = weight.bias.conf$sigma,
+                                          varcov = weight.bias.conf$varcov,
                                           weights = weight.bias.conf$weights,
                                           edge = weight.bias.conf$edge,
                                           zo.norm = weight.bias.conf$zo.norm)
@@ -432,7 +432,13 @@ ppmveAsym <- function(points = NULL,
                                  seed = seed),
                      bkgd.points = b.points)
     
-    class(ret.list) <- c("ppmveAsym", Distance)
+    if(Distance == "mahalanobis"){
+      class(ret.list) <- c("ppmve", Distance, CovMat)
+    }
+    
+    if(Distance == "euclidean"){
+      class(ret.list) <- c("ppmve", Distance)
+    }
     return(ret.list)
     
   } else {
@@ -465,7 +471,13 @@ ppmveAsym <- function(points = NULL,
                                  seed = seed),
                      bkgd.points = b.points)
     
-    class(ret.list) <- c("ppmveAsym", Distance)
+    if(Distance == "mahalanobis"){
+      class(ret.list) <- c("ppmve", Distance, CovMat)
+    }
+    
+    if(Distance == "euclidean"){
+      class(ret.list) <- c("ppmve", Distance)
+    }
     return(ret.list)
   }
 }

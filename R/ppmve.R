@@ -168,7 +168,7 @@ ppmve <- function(points = NULL,
                                           positive = weight.bias.conf$positive,
                                           kernel = weight.bias.conf$kernel,
                                           sigma = weight.bias.conf$sigma,
-                                          varcov = weight.bias.conf$sigma,
+                                          varcov = weight.bias.conf$varcov,
                                           weights = weight.bias.conf$weights,
                                           edge = weight.bias.conf$edge,
                                           zo.norm = weight.bias.conf$zo.norm)
@@ -201,7 +201,7 @@ ppmve <- function(points = NULL,
                                           positive = weight.bias.conf$positive,
                                           kernel = weight.bias.conf$kernel,
                                           sigma = weight.bias.conf$sigma,
-                                          varcov = weight.bias.conf$sigma,
+                                          varcov = weight.bias.conf$varcov,
                                           weights = weight.bias.conf$weights,
                                           edge = weight.bias.conf$edge,
                                           zo.norm = weight.bias.conf$zo.norm)
@@ -390,11 +390,11 @@ ppmve <- function(points = NULL,
                           beta.prec = priors$beta.prec)
       } 
     
-    if(length(wei == 1)){
+    if(length(wei) == 1){
       constants$w <- c(rep(1/wei, nrow(points)), rep(wei, nrow(clim.back)))
     }
     
-    if(length(wei > 1)){
+    if(length(wei) > 1){
       constants$w <- c(rep(1/(stats::median(wei)), nrow(points)), wei)
     }
     
@@ -490,7 +490,13 @@ ppmve <- function(points = NULL,
                                  seed = seed),
                      bkgd.points = b.points)
     
-    class(ret.list) <- c("ppmve", Distance, CovMat)
+    if(Distance == "mahalanobis"){
+      class(ret.list) <- c("ppmve", Distance, CovMat)
+    }
+    
+    if(Distance == "euclidean"){
+      class(ret.list) <- c("ppmve", Distance)
+    }
     
     return(ret.list)
   } else {
@@ -529,7 +535,7 @@ ppmve <- function(points = NULL,
     
     
     if(Distance == "mahalanobis"){
-      class(ret.list) <- c("ppmve", Distance)
+      class(ret.list) <- c("ppmve", Distance, CovMat)
     }
     
     if(Distance == "euclidean"){

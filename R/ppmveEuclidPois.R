@@ -4,7 +4,7 @@ Euclid <- nimble::nimbleCode({
     tau.pres[i]  ~ dunif(tau.min[i], tau.max[i])
   }
   
-  beta ~ dnorm(beta.mean, beta.tau)
+  beta ~ dnorm(beta.mean, beta.prec)
   
   #Centroid likelihood
   for(i in 1:n.data){

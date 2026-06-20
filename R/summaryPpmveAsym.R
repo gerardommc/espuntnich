@@ -8,5 +8,5 @@
 #' @method summary ppmveAsym
 
 summary.ppmveAsym <- function(model){
-  UseMethod(generic = "summary.ppmveAsym", model)
+  UseMethod(generic = "ppmveAsym", model)
 }

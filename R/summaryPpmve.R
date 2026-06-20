@@ -8,7 +8,7 @@
 #' @method summary ppmve
 
 summary.ppmve <- function(model){
-  UseMethod(generic = "summary.ppmve", model)
+  UseMethod(generic = "ppmve", model)
 }
 
 
