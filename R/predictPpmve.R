@@ -8,6 +8,6 @@
 #' @method predict ppmve
 
 predict.ppmve <- function(object, newdata, probs){
-  UseMethod(generic = "ppmve", object)
+  UseMethod(generic = "predict.ppmve", object)
 }
 
