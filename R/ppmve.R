@@ -189,14 +189,9 @@ ppmve <- function(points = NULL,
         }
           
         if(inherits(bias.data, "SpatRaster")){
-            
-            bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
-            bias.df <- as.data.frame(bias.data, xy = TRUE)
-            ids.bias <- sample(1:nrow(bias.df), no.bkgd, prob = bias.df[, 3]) |> sort()
-            locs.bias <- bias.df[ids.bias, ]
-            
-            Qa <- espatsmo::replaceQAreas(Q = Q,
-                                          bias.data = locs.bias,
+
+          Qa <- espatsmo::replaceQAreas(Q = Q,
+                                          bias.data = bias.data,
                                           im = iml[[1]],
                                           positive = weight.bias.conf$positive,
                                           kernel = weight.bias.conf$kernel,
