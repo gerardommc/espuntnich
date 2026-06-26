@@ -120,8 +120,8 @@ ppmve <- function(points = NULL,
       
       covariates <- covariates[[covariate.names]]
       
-      cov.df <- as.data.frame(covariates, xy = T)
-      p.ext <- terra::extract(covariates, points, ID = F, na.rm = T) |> stats::na.omit() |> as.data.frame()
+      cov.df <- as.data.frame(covariates, xy = TRUE)
+      p.ext <- terra::extract(covariates, points, ID = F, na.rm = TRUE) |> stats::na.omit() |> as.data.frame()
       
       iml <- espatsmo::imFromStack(covariates)
       win <- spatstat.geom::as.owin(iml[[1]])
@@ -133,11 +133,10 @@ ppmve <- function(points = NULL,
       beg <- Q$w |> length() - iml[[1]][] |>length() + 1
       en <- Q$w |> length()
 
-
     if(is.null(bias.correction)){
       if(is.null(background.points)){
         samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
-        wei <- max(Q$w)
+        wei <- max(Q$w) * nrow(cov.df)/length(samp)
         clim.back <- cov.df[samp, -c(1:2)]
       }
 
@@ -152,7 +151,7 @@ ppmve <- function(points = NULL,
         }
 
         clim.back <- terra::extract(covariates, background.points, ID = F, na.rm = T) |> stats::na.omit() |> as.data.frame()
-        wei <- max(Q$w)
+        wei <- max(Q$w) * nrow(cov.df)/nrow(background.points)
       }
     }
       
@@ -198,7 +197,7 @@ ppmve <- function(points = NULL,
           
           nas <- is.na(wei[, 1])
           samp <- samp[!nas]
-          wei <- wei[!nas, 1]
+          wei <- wei[!nas, 1] * nrow(cov.df)/length(samp)
         }
         
         if (inherits(bias.data, "SpatRaster")) {
@@ -230,7 +229,7 @@ ppmve <- function(points = NULL,
           
           nas <- is.na(wei[, 1])
           samp <- samp[!nas]
-          wei <- wei[!nas, 1]
+          wei <- wei[!nas, 1] * nrow(cov.df)/length(samp)
         }
       }
         
@@ -239,12 +238,12 @@ ppmve <- function(points = NULL,
         if(inherits(bias.data, "data.frame")){
             bias.ppp <- spatstat.geom::ppp(x = bias.data$x, y = bias.data$y, window = win)
             dens.r <- spatstat.geom::density.ppp(bias.ppp,
-                                                positive = weight.bias.conf$positive,
-                                                kernel = weight.bias.conf$kernel,
-                                                sigma = weight.bias.conf$sigma,
-                                                varcov = weight.bias.conf$varcov,
-                                                weights = weight.bias.conf$weights,
-                                                edge = weight.bias.conf$edge) |> terra::rast()
+                                                 positive = weight.bias.conf$positive,
+                                                 kernel = weight.bias.conf$kernel,
+                                                 sigma = weight.bias.conf$sigma,
+                                                 varcov = weight.bias.conf$varcov,
+                                                 weights = weight.bias.conf$weights,
+                                                 edge = weight.bias.conf$edge) |> terra::rast()
             
             dens.df <- as.data.frame(dens.r, xy = TRUE)
             
@@ -254,7 +253,7 @@ ppmve <- function(points = NULL,
             
             samp <- sample(1:nrow(dens.df), no.bkgd, prob = dens.df[, 3]) |> sort()
             
-            wei <- max(Q$w)
+            wei <- max(Q$w) * nrow(cov.df)/length(samp)
         }
           
         if(inherits(bias.data, "SpatRaster")){
@@ -268,10 +267,10 @@ ppmve <- function(points = NULL,
             
             samp <- sample(1:nrow(bias.df), no.bkgd, prob = bias.df[, 3]) |> sort()
             
-            wei <- max(Q$w)
+            wei <- max(Q$w) * nrow(cov.df)/length(samp)
         }
       }
-            clim.back <- cov.df[samp, -c(1:2)]
+      clim.back <- cov.df[samp, -c(1:2)]
     }
   }
     
@@ -281,7 +280,7 @@ ppmve <- function(points = NULL,
       p.ext <- samples.data$presence.data[, covariate.names]
   }
 
-  # Configuring data, constants and parameters ffor each model type 
+  # Configuring data, constants and parameters for each model type 
   
   if(Distance == "mahalanobis"){
 

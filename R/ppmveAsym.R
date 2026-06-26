@@ -109,7 +109,9 @@ ppmveAsym <- function(points = NULL,
   if(!is.null(points) & !is.null(covariates)){
 
       names(points) <- c("x", "y")
+      
       covariates <- covariates[[covariate.names]]
+
       cov.df <- as.data.frame(covariates, xy = TRUE)
       p.ext <- terra::extract(covariates, points, ID = FALSE, na.rm = TRUE) |> stats::na.omit() |> as.data.frame()
       
@@ -117,30 +119,38 @@ ppmveAsym <- function(points = NULL,
       win <- spatstat.geom::as.owin(iml[[1]])
       p.pp <- spatstat.geom::ppp(x = points$x, y = points$y, window = win)
       
+      #Calculating weights
       Q <- spatstat.geom::pixelquad(p.pp)
-      beg <- Q$w |> length() - iml[[1]][] |> length() + 1
+      
+      beg <- Q$w |> length() - iml[[1]][] |>length() + 1
       en <- Q$w |> length()
 
     if(is.null(bias.correction)){
       if(is.null(background.points)){
         samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
-        wei <- max(Q$w)
+        wei <- max(Q$w) * nrow(cov.df)/length(samp)
         clim.back <- cov.df[samp, -c(1:2)]
       }
 
       if(!is.null(background.points)){
+
         if(!inherits(background.points, "matrix") & !inherits(background.points, "data.frame")){
           stop("Please provide background.points as a two-column data.frame")
         }
+
         if(inherits(background.points, "matrix")){
           background.points <- as.data.frame(background.points)
         }
-        clim.back <- terra::extract(covariates, background.points, ID = FALSE, na.rm = TRUE) |> stats::na.omit() |> as.data.frame()
-        wei <- max(Q$w)
+
+        clim.back <- terra::extract(covariates, background.points, ID = F, na.rm = T) |> stats::na.omit() |> as.data.frame()
+        wei <- max(Q$w) * nrow(cov.df)/nrow(background.points)
       }
     }
       
     if(!is.null(bias.correction)){
+        
+        #Background data with bias correction
+        #Bias correction based on are weights
       if (bias.correction == "weights") {
         if (inherits(bias.data, "data.frame")) {
           
@@ -179,8 +189,9 @@ ppmveAsym <- function(points = NULL,
           
           nas <- is.na(wei[, 1])
           samp <- samp[!nas]
-          wei <- wei[!nas, 1]
+          wei <- wei[!nas, 1] * nrow(cov.df)/length(samp)
         }
+        
         if (inherits(bias.data, "SpatRaster")) {
 
           bias.df <- terra::as.data.frame(bias.data, xy = TRUE)
@@ -210,10 +221,11 @@ ppmveAsym <- function(points = NULL,
           
           nas <- is.na(wei[, 1])
           samp <- samp[!nas]
-          wei <- wei[!nas, 1]
+          wei <- wei[!nas, 1] * nrow(cov.df)/length(samp)
         }
       }
         
+        #Bias correction based on location of  background data
       if(bias.correction == "background"){
         if(inherits(bias.data, "data.frame")){
             bias.ppp <- spatstat.geom::ppp(x = bias.data$x, y = bias.data$y, window = win)
@@ -226,21 +238,28 @@ ppmveAsym <- function(points = NULL,
                                                  edge = weight.bias.conf$edge) |> terra::rast()
             
             dens.df <- as.data.frame(dens.r, xy = TRUE)
+            
             area.weights <- iml[[1]]
             area.weights[] <- Q$w[beg:en]
             weights.r <- area.weights |> terra::rast()
+            
             samp <- sample(1:nrow(dens.df), no.bkgd, prob = dens.df[, 3]) |> sort()
-            wei <- max(Q$w)
+            
+            wei <- max(Q$w) * nrow(cov.df)/length(samp)
         }
           
         if(inherits(bias.data, "SpatRaster")){
             bias.data <- terra::resample(bias.data, covariates[[1]]) |> espatsmo::ZeroOneNorm()
+            
             bias.df <- as.data.frame(bias.data, xy = TRUE)
+            
             area.weights <- iml[[1]]
             area.weights[] <- Q$w[beg:en]
             weights.r <- area.weights |> terra::rast()
+            
             samp <- sample(1:nrow(bias.df), no.bkgd, prob = bias.df[, 3]) |> sort()
-            wei <- max(Q$w)
+            
+            wei <- max(Q$w) * nrow(cov.df)/length(samp)
         }
       }
       clim.back <- cov.df[samp, -c(1:2)]
@@ -254,12 +273,20 @@ ppmveAsym <- function(points = NULL,
   }
 
   # Configuring data, constants and parameters for asymmetric versions
+
   if(Distance == "mahalanobis"){
     
     # Asymmetric Mahalanobis monitors track skewness parameters (alpha)
-    parms <- c("centroid.pres", "mu.back", "tau.pres", "alpha", "beta")
+
     
     if(CovMat == "local"){
+
+	    parms <- c("centroid.pres", 
+		       "mu.back", 
+		       "tau.pres", 
+		       "alpha", 
+		       "beta")
+
       if(is.null(priors)){
         constants <- list(n.clim = ncol(clim.back),
                           R = diag(ncol(clim.back)),
@@ -376,9 +403,11 @@ ppmveAsym <- function(points = NULL,
   
   # Selecting the specified Nimble Asymmetric Model
   if(Distance == "mahalanobis"){
+    
     if(CovMat == "local"){
       modelCode <- LocalMahalAsym
     }
+    
     if(CovMat == "locallocal"){
       modelCode <- LocalLocalMahalAsym
     }
@@ -454,11 +483,11 @@ ppmveAsym <- function(points = NULL,
                      bkgd.points = b.points)
     
     if(Distance == "mahalanobis"){
-      class(ret.list) <- c("ppmve", Distance, CovMat)
+      class(ret.list) <- c("ppmveAsym", Distance, CovMat)
     }
     
     if(Distance == "euclidean"){
-      class(ret.list) <- c("ppmve", Distance)
+      class(ret.list) <- c("ppmveAsym", Distance)
     }
     return(ret.list)
     
@@ -493,11 +522,11 @@ ppmveAsym <- function(points = NULL,
                      bkgd.points = b.points)
     
     if(Distance == "mahalanobis"){
-      class(ret.list) <- c("ppmve", Distance, CovMat)
+      class(ret.list) <- c("ppmveAsym", Distance, CovMat)
     }
     
     if(Distance == "euclidean"){
-      class(ret.list) <- c("ppmve", Distance)
+      class(ret.list) <- c("ppmveAsym", Distance)
     }
     return(ret.list)
   }
