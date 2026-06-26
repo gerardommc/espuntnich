@@ -160,55 +160,77 @@ ppmve <- function(points = NULL,
         
         #Background data with bias correction
         #Bias correction based on are weights
-      if(bias.correction == "weights"){
-        if(inherits(bias.data, "data.frame")){
-            Qa <- espatsmo::replaceQAreas(Q = Q,
-                                          bias.data = bias.data,
-                                          im = iml[[1]],
-                                          positive = weight.bias.conf$positive,
-                                          kernel = weight.bias.conf$kernel,
-                                          sigma = weight.bias.conf$sigma,
-                                          varcov = weight.bias.conf$varcov,
-                                          weights = weight.bias.conf$weights,
-                                          edge = weight.bias.conf$edge,
-                                          zo.norm = weight.bias.conf$zo.norm)
-            
-            area.weights <- iml[[1]]
-            area.weights[] <- Qa$w[beg:en]
-            weights.r <- area.weights |> terra::rast()
-            
-            samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
-            
-            wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])[,2]
-            
-            nas <- wei |> is.na()
-            
-            samp <- samp[!nas]
-            
-            wei <- wei[!nas]
-        }
+      if (bias.correction == "weights") {
+        if (inherits(bias.data, "data.frame")) {
           
-        if(inherits(bias.data, "SpatRaster")){
+          bias.ppp <- spatstat.geom::ppp(x = bias.data$x, 
+                                         y = bias.data$y, window = win)
+          
+          dens.r <- terra::rast(spatstat.geom::density.ppp(bias.ppp, 
+                                                           positive = weight.bias.conf$positive, kernel = weight.bias.conf$kernel, 
+                                                           sigma = weight.bias.conf$sigma, varcov = weight.bias.conf$varcov, 
+                                                           weights = weight.bias.conf$weights, edge = weight.bias.conf$edge))
+          
+          bias.df <- terra::as.data.frame(dens.r, xy = TRUE)
+          ux <- bias.df$x |> unique() |> sort()
+          uy <- bias.df$y |> unique() |> sort()
+          
+          dx <- ux[2] - ux[1]
+          dy <- uy[2] - uy[1]
+          
+          area <- dx * dy
+          
+          sum.bias <- terra::global(bias.data, sum, na.rm = TRUE)
+          
+          ones <- terra::classify(bias.data, rcl = matrix(c(-Inf, Inf, 1), ncol = 3))
+          
+          sum.ones <- terra::global(ones, sum, na.rm = TRUE)
+          
+          bias.data <- bias.data / sum.bias$sum
+          p.area <- ones / sum.ones$sum
+          
+          Ratio <- bias.data / p.area
+          
+          area.weights <- Ratio * area
+          
+          samp <- sort(sample(1:nrow(cov.df), no.bkgd))
+          wei <- terra::extract(area.weights, cov.df[samp, c("x", "y")], ID = FALSE)
+          
+          nas <- is.na(wei[, 1])
+          samp <- samp[!nas]
+          wei <- wei[!nas, 1]
+        }
+        
+        if (inherits(bias.data, "SpatRaster")) {
 
-          Qa <- espatsmo::replaceQAreas(Q = Q,
-                                          bias.data = bias.data,
-                                          im = iml[[1]],
-                                          positive = weight.bias.conf$positive,
-                                          kernel = weight.bias.conf$kernel,
-                                          sigma = weight.bias.conf$sigma,
-                                          varcov = weight.bias.conf$varcov,
-                                          weights = weight.bias.conf$weights,
-                                          edge = weight.bias.conf$edge,
-                                          zo.norm = weight.bias.conf$zo.norm)
-            
-            area.weights <- iml[[1]]
-            area.weights[] <- Qa$w[beg:en]
-            weights.r <- area.weights |> terra::rast()
-            samp <- sample(1:nrow(cov.df), no.bkgd) |> sort()
-            wei <- terra::extract(weights.r, cov.df[samp, c("x", "y")])
-            nas <- wei |> is.na()
-            samp <- samp[!nas]
-            wei <- wei[!nas]
+          bias.df <- terra::as.data.frame(bias.data, xy = TRUE)
+          ux <- bias.df$x |> unique() |> sort()
+          uy <- bias.df$y |> unique() |> sort()
+          
+          dx <- ux[2] - ux[1]
+          dy <- uy[2] - uy[1]
+          
+          area <- dx * dy
+          
+          sum.bias <- terra::global(bias.data, sum, na.rm = TRUE)
+          
+          ones <- terra::classify(bias.data, rcl = matrix(c(-Inf, Inf, 1), ncol = 3))
+          
+          sum.ones <- terra::global(ones, sum, na.rm = TRUE)
+          
+          bias.data <- bias.data / sum.bias$sum
+          p.area <- ones / sum.ones$sum
+          
+          Ratio <- bias.data / p.area
+          
+          area.weights <- Ratio * area
+
+          samp <- sort(sample(1:nrow(cov.df), no.bkgd))
+          wei <- terra::extract(area.weights, cov.df[samp, c("x", "y")], ID = FALSE)
+          
+          nas <- is.na(wei[, 1])
+          samp <- samp[!nas]
+          wei <- wei[!nas, 1]
         }
       }
         
