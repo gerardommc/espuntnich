@@ -5,12 +5,15 @@
 #' @param  ... parameters passed on to priors
 #' @return Returns a list with mean and precision for centroids, covariance matrices and intercept
 #' @examples
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espatsmo") |>  terra::rast() |> scale()
 #' 
-#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+#' p <- system.file("extdata", "points.csv", package = "espatsmo") |>  read.csv()
 #' 
-#' p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
+#' s <-  system.file("extdata", "RandomSamples.csv", package = "espatsmo") |>  read.csv()
 #' 
-#' m <- ppmve(points = p,
+#' pr <- p[s$Samples, ]
+#' 
+#' m <- ppmve(points = pr,
 #'            covariates = r,
 #'            covariate.names = names(r),
 #'            CovMat = "local",
