@@ -22,11 +22,15 @@ a fitted model, and the covariates in SpatRaster format with the same name as
 used to fit the model.
 }
 \examples{
-r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+r <- system.file("extdata", "ChelsaBio.tif", package = "espatsmo") |>  terra::rast() |> scale()
 
-p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+p <- system.file("extdata", "points.csv", package = "espatsmo") |>  read.csv()
 
-m <- ppmve(points = p,
+s <-  system.file("extdata", "RandomSamples.csv", package = "espatsmo") |>  read.csv()
+
+pr <- p[s$Samples, ]
+
+m <- ppmve(points = pr,
            covariates = r,
            covariate.names = names(r),
            CovMat = "local",
@@ -35,7 +39,7 @@ m <- ppmve(points = p,
            niter = 10000,
            nthin = 9,
            nburnin = 1000,
-           chains = 1) 
+           chains = 1)
 
 predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
 

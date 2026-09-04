@@ -90,16 +90,40 @@ Fit a minimum volume elipsoid as a covariate within an inhomogeneous Poisson Poi
 to develop an Ecological Niche Model using point locations and at least two raster covariates.
 }
 \examples{
+r <- system.file("extdata", "ChelsaBio.tif", package = "espatsmo") |>  terra::rast() |> scale()
 
-r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+p <- system.file("extdata", "points.csv", package = "espatsmo") |>  read.csv()
 
-p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+s <-  system.file("extdata", "RandomSamples.csv", package = "espatsmo") |>  read.csv()
 
-m <- ppmve(points = p,
+pr <- p[s$Samples, ]
+
+# Model with random sampling
+m <- ppmve(points = pr,
            covariates = r,
            covariate.names = names(r),
            CovMat = "local",
            Distance = "mahalanobis",
+           no.bkgd = 5000,
+           niter = 10000,
+           nthin = 9,
+           nburnin = 1000,
+           chains = 1)
+
+bias <- system.file("extdata", "Target-group.tif", package = "espatsmo") |> terra::rast()
+
+sb <- system.file("extdata", "BiasSamples.csv", package = "espatsmo") |>  read.csv()
+
+pb <- p[sb$Samples, ]
+
+# Model with biased sampling
+mb <- ppmve(points = pb,
+           covariates = r,
+           covariate.names = names(r),
+           CovMat = "local",
+           Distance = "mahalanobis",
+           bias.data = bias,
+           bias.correction = "weights",
            no.bkgd = 5000,
            niter = 10000,
            nthin = 9,

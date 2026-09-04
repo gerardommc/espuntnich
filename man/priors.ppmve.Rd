@@ -9,7 +9,10 @@
 \arguments{
 \item{model}{A model object of class ppmve or ppmveAsym}
 
-\item{...}{parameters passed on to priors}
+\item{relax.precision}{Logical to indicate whether the precision for parameters should be reduced from what the provided model indicates}
+
+\item{relax.factor}{A numeric single value or vector with length equal to the number of covariates in the model to indicate how much prior precision will be changed. 
+Values > 1 reduce precision, and values < 1 increase it.}
 }
 \value{
 Returns a list with mean and precision for centroids, covariance matrices and intercept
@@ -18,12 +21,15 @@ Returns a list with mean and precision for centroids, covariance matrices and in
 Use a local type of CovMat ppmve or ppmveAsym model to set the prior values for a locallocal model
 }
 \examples{
+r <- system.file("extdata", "ChelsaBio.tif", package = "espatsmo") |>  terra::rast() |> scale()
 
-r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+p <- system.file("extdata", "points.csv", package = "espatsmo") |>  read.csv()
 
-p <- system.file("extdata", "pointsAsym.csv", package = "espuntnich") |> read.csv()
+s <-  system.file("extdata", "RandomSamples.csv", package = "espatsmo") |>  read.csv()
 
-m <- ppmve(points = p,
+pr <- p[s$Samples, ]
+
+m <- ppmve(points = pr,
            covariates = r,
            covariate.names = names(r),
            CovMat = "local",

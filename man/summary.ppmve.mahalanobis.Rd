@@ -18,11 +18,16 @@ probability values for each of the parameter posteriors, relevant
 to the type of analysis for which the method has been designed
 }
 \examples{
-r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+r <- system.file("extdata", "ChelsaBio.tif", package = "espatsmo") |>  terra::rast() |> scale()
 
-p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+p <- system.file("extdata", "points.csv", package = "espatsmo") |>  read.csv()
 
-m <- ppmve(points = p,
+s <-  system.file("extdata", "RandomSamples.csv", package = "espatsmo") |>  read.csv()
+
+pr <- p[s$Samples, ]
+
+# Model with random sampling
+m <- ppmve(points = pr,
            covariates = r,
            covariate.names = names(r),
            CovMat = "local",

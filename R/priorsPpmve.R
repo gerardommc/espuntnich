@@ -2,7 +2,9 @@
 #' @description
 #' Use a local type of CovMat ppmve or ppmveAsym model to set the prior values for a locallocal model
 #' @param model A model object of class ppmve or ppmveAsym
-#' @param  ... parameters passed on to priors
+#' @param relax.precision Logical to indicate whether the precision for parameters should be reduced from what the provided model indicates
+#' @param relax.factor A numeric single value or vector with length equal to the number of covariates in the model to indicate how much prior precision will be changed. 
+#' Values > 1 reduce precision, and values < 1 increase it.
 #' @return Returns a list with mean and precision for centroids, covariance matrices and intercept
 #' @examples
 #' r <- system.file("extdata", "ChelsaBio.tif", package = "espatsmo") |>  terra::rast() |> scale()

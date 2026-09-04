@@ -5,8 +5,6 @@
 #' @param  ... parameters passed on to priors
 #' @return Returns a list with mean and precision for centroids, covariance matrices and intercept
 #' @export
-#' @method priors
-
 
 priors <- function(model, ...){
   

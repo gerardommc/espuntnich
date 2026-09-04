@@ -6,11 +6,16 @@
 #' @param model = A model object of class ppmve
 #' @return A summary of the posterior samples for the fitted model
 #' @examples
-#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espatsmo") |>  terra::rast() |> scale()
 #' 
-#' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+#' p <- system.file("extdata", "points.csv", package = "espatsmo") |>  read.csv()
 #' 
-#' m <- ppmve(points = p,
+#' s <-  system.file("extdata", "RandomSamples.csv", package = "espatsmo") |>  read.csv()
+#' 
+#' pr <- p[s$Samples, ]
+#' 
+#' # Model with random sampling
+#' m <- ppmve(points = pr,
 #'            covariates = r,
 #'            covariate.names = names(r),
 #'            CovMat = "local",

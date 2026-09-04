@@ -8,11 +8,15 @@
 #' @param probs = The posterior probability quantiles to be returned by predict.ppmve
 #' @return Returns a single or multiple band SpatRaster object, representing point intensity as a function of distance to the estimated centroids
 #' @examples
-#' r <- system.file("extdata", "ChelsaBio.tif", package = "espuntnich") |> terra::rast() |> scale()
+#' r <- system.file("extdata", "ChelsaBio.tif", package = "espatsmo") |>  terra::rast() |> scale()
 #' 
-#' p <- system.file("extdata", "points.csv", package = "espuntnich") |> read.csv()
+#' p <- system.file("extdata", "points.csv", package = "espatsmo") |>  read.csv()
 #' 
-#' m <- ppmve(points = p,
+#' s <-  system.file("extdata", "RandomSamples.csv", package = "espatsmo") |>  read.csv()
+#' 
+#' pr <- p[s$Samples, ]
+#' 
+#' m <- ppmve(points = pr,
 #'            covariates = r,
 #'            covariate.names = names(r),
 #'            CovMat = "local",
@@ -21,7 +25,7 @@
 #'            niter = 10000,
 #'            nthin = 9,
 #'            nburnin = 1000,
-#'            chains = 1) 
+#'            chains = 1)
 #' 
 #' predictions <- predict(object = m, newdata = r, probs = c(0.0275, 0.5, 0.975))
 #' 
